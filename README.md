@@ -1,0 +1,19 @@
+- Agent: Tools Loop
+  - Customer Support Agent
+  - Coding Agent
+  - Computer Use Agent
+- Workflow: Prompt Chaining
+  - Marketing Copy with Translation
+  - Document Outline Writing
+- Workflow: Routing
+  - Customer Service Querying
+  - Hard/easy question routing
+- Workflow: Parallelization
+  - Code Vulnerability Voting
+  - Content Flagging Voting
+- Workflow: Orchestrator-workers
+  - Architect-Developer Code Changes
+  - Multi-Source Searching
+- Workflow: Evaluator-optimizer
+  - Literaly Translation
+  - Multi-Round Searching
