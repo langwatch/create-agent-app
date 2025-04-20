@@ -37,7 +37,7 @@ def http_GET_order_status(order_id: str) -> OrderStatusResponse:
     if not order_id in ["9127412", "3451323"]:
         raise ValueError("Order not found")
 
-    time.sleep(1)
+    time.sleep(0.1)
     random_status: Literal["pending", "shipped", "delivered", "cancelled"] = (
         random.choice(["pending", "shipped", "delivered", "cancelled"])
     )
@@ -51,7 +51,7 @@ class DocumentResponse(TypedDict):
 
 
 def http_GET_company_policy() -> DocumentResponse:
-    time.sleep(1)
+    time.sleep(0.1)
     with open(
         path.join(path.dirname(__file__), "knowledge_base", "company_policy.md"), "r"
     ) as f:
@@ -65,7 +65,7 @@ def http_GET_company_policy() -> DocumentResponse:
 def http_GET_troubleshooting_guide(
     guide: Literal["internet", "mobile", "television", "ecommerce"],
 ) -> DocumentResponse:
-    time.sleep(1)
+    time.sleep(0.1)
     with open(
         path.join(
             path.dirname(__file__), "knowledge_base", f"troubleshooting_{guide}.md"

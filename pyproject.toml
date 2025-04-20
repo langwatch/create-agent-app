@@ -10,4 +10,9 @@ dependencies = []
 packages = ["create_agent_app"]
 
 [tool.uv.workspace]
-members = ["langgraph_functional_api_example", "langgraph_highlevel_api_example", "pydantic_ai_example"]
+members = [
+  "langgraph_functional_api_example",
+  "langgraph_highlevel_api_example",
+  "pydantic_ai_example",
+  "google_adk_example",
+]

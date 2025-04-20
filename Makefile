@@ -1,4 +1,4 @@
-EXAMPLE_DIRS = langgraph_functional_api_example langgraph_highlevel_api_example pydantic_ai_example
+EXAMPLE_DIRS = langgraph_functional_api_example langgraph_highlevel_api_example pydantic_ai_example google_adk_example
 
 test:
 	@if [ -z "$(filter-out $@,$(MAKECMDGOALS))" ]; then \

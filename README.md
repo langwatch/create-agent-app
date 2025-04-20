@@ -1,7 +1,7 @@
 - Agent: Tools Loop
   - Customer Support Agent
   - Coding Agent
-  - Computer Use Agent
+  - Computer Use Agent (MCP?)
 - Workflow: Prompt Chaining
   - Marketing Copy with Translation
   - Document Outline Writing
