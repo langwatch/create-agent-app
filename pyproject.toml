@@ -15,4 +15,5 @@ members = [
   "langgraph_highlevel_api_example",
   "pydantic_ai_example",
   "google_adk_example",
+  "inspect_ai_example",
 ]

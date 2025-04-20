@@ -100,29 +100,60 @@ Today is 2025-04-19
 
 
 def get_customer_order_history() -> List[OrderSummaryResponse]:
-    """Get the current customer order history"""
+    """
+    Get the current customer order history
+
+    Returns:
+        The customer order history
+    """
     return http_GET_customer_order_history()
 
 
 def get_order_status(order_id: str) -> OrderStatusResponse:
-    """Get the status of a specific order"""
+    """
+    Get the status of a specific order
+
+    Args:
+        order_id: The ID of the order to get the status of
+
+    Returns:
+        The status of the order
+    """
     return http_GET_order_status(order_id)
 
 
 def get_company_policy() -> DocumentResponse:
-    """Get the company policy"""
+    """
+    Get the company policy
+
+    Returns:
+        The company policy document
+    """
     return http_GET_company_policy()
 
 
 def get_troubleshooting_guide(
     guide: Literal["internet", "mobile", "television", "ecommerce"],
 ) -> DocumentResponse:
-    """Get the troubleshooting guide"""
+    """
+    Get the troubleshooting guide
+
+    Args:
+        guide: The guide to get the troubleshooting guide for, one of "internet", "mobile", "television", "ecommerce"
+
+    Returns:
+        The troubleshooting guide document
+    """
     return http_GET_troubleshooting_guide(guide)
 
 
 def escalate_to_human() -> dict[str, str]:
-    """Escalate to human, retrieves a link for the customer to open a ticket with the support team"""
+    """
+    Escalate to human, retrieves a link for the customer to open a ticket with the support team
+
+    Returns:
+        A link for the customer to open a ticket with the support team
+    """
     return {
         "url": "https://support.xpto.com/tickets",
         "type": "escalation",

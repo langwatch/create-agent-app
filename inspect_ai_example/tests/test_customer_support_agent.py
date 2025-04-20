@@ -6,7 +6,7 @@ import uuid
 import pytest
 
 from scenario import Scenario, TestingAgent
-from google_adk_example.customer_support_agent import call_agent
+from inspect_ai_example.customer_support_agent import call_agent
 
 Scenario.configure(
     testing_agent=TestingAgent(model="gemini/gemini-2.5-flash-preview-04-17"),

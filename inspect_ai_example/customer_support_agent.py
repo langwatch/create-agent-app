@@ -1,30 +1,24 @@
-# References:
-# - https://ai.pydantic.dev/agents
-# - https://ai.pydantic.dev/tools
-
-from typing import Any, List, Literal
+import json
+import os
+from typing import Any, Literal
 import dotenv
 
 dotenv.load_dotenv()
 
 from create_agent_app.common.cutomer_support.mocked_apis import (
-    DocumentResponse,
-    OrderSummaryResponse,
-    OrderStatusResponse,
     http_GET_company_policy,
     http_GET_customer_order_history,
     http_GET_order_status,
     http_GET_troubleshooting_guide,
 )
-from pydantic_ai import Agent
-from pydantic_ai.messages import UserPromptPart, ModelMessage
-from pydantic_graph import End
-from pydantic_ai.models.openai import OpenAIModel
-from pydantic_ai.providers.openai import OpenAIProvider
 
-agent = Agent(
-    "google-gla:gemini-2.5-flash-preview-04-17",
-    system_prompt="""
+from inspect_ai.agent import Agent, AgentState, agent, run
+from inspect_ai.model import ChatMessageSystem, ChatMessageUser, get_model
+from inspect_ai.tool import tool, ToolResult
+from inspect_ai.model._openai import openai_chat_messages
+
+
+SYSTEM_PROMPT = """
 <Introduction>
 You are an AI customer service agent for XPTO Telecom, a telecommunications company providing internet, mobile, and television services, as well as selling mobile devices and related electronics. Your primary goal is to assist customers with their inquiries efficiently and effectively. You should always strive to provide helpful, accurate, and polite responses.
 
@@ -93,108 +87,133 @@ Example:
 <Info>
 Today is 2025-04-19
 </Info>
-""",
-)
+"""
 
 
-@agent.tool_plain
-def get_customer_order_history() -> List[OrderSummaryResponse]:
-    """
-    Get the current customer order history
+@tool
+def get_customer_order_history():
+    async def execute() -> ToolResult:
+        """
+        Get the current customer order history
 
-    Returns:
-        The customer order history
-    """
-    return http_GET_customer_order_history()
+        Returns:
+            The customer order history
+        """
+        return json.dumps(http_GET_customer_order_history())
 
-
-@agent.tool_plain
-def get_order_status(order_id: str) -> OrderStatusResponse:
-    """
-    Get the status of a specific order
-
-    Args:
-        order_id: The ID of the order to get the status of
-
-    Returns:
-        The status of the order
-    """
-    return http_GET_order_status(order_id)
+    return execute
 
 
-@agent.tool_plain
-def get_company_policy() -> DocumentResponse:
-    """
-    Get the company policy
+@tool
+def get_order_status():
+    async def execute(order_id: str) -> ToolResult:
+        """
+        Get the status of a specific order
 
-    Returns:
-        The company policy document
-    """
-    return http_GET_company_policy()
+        Args:
+            order_id: The ID of the order to get the status of
 
+        Returns:
+            The status of the order
+        """
+        return json.dumps(http_GET_order_status(order_id))
 
-@agent.tool_plain
-def get_troubleshooting_guide(
-    guide: Literal["internet", "mobile", "television", "ecommerce"],
-) -> DocumentResponse:
-    """
-    Get the troubleshooting guide
-
-    Args:
-        guide: The guide to get the troubleshooting guide for, one of "internet", "mobile", "television", "ecommerce"
-
-    Returns:
-        The troubleshooting guide document
-    """
-    return http_GET_troubleshooting_guide(guide)
+    return execute
 
 
-@agent.tool_plain
-def escalate_to_human() -> dict[str, str]:
-    """
-    Escalate to human, retrieves a link for the customer to open a ticket with the support team
+@tool
+def get_company_policy():
+    async def execute() -> ToolResult:
+        """
+        Get the company policy
 
-    Returns:
-        A link for the customer to open a ticket with the support team
-    """
-    return {
-        "url": "https://support.xpto.com/tickets",
-        "type": "escalation",
-    }
+        Returns:
+            The company policy document
+        """
+        return json.dumps(http_GET_company_policy())
+
+    return execute
+
+
+@tool
+def get_troubleshooting_guide():
+    async def execute(
+        guide: Literal["internet", "mobile", "television", "ecommerce"],
+    ) -> ToolResult:
+        """
+        Get the troubleshooting guide
+
+        Args:
+            guide: The guide to get the troubleshooting guide for, one of "internet", "mobile", "television", "ecommerce"
+
+        Returns:
+            The troubleshooting guide document
+        """
+        return json.dumps(http_GET_troubleshooting_guide(guide))
+
+    return execute
+
+
+@tool
+def escalate_to_human():
+    async def execute() -> ToolResult:
+        """
+        Escalate to human, retrieves a link for the customer to open a ticket with the support team
+
+        Returns:
+            A link for the customer to open a ticket with the support team
+        """
+        return json.dumps(
+            {
+                "url": "https://support.xpto.com/tickets",
+                "type": "escalation",
+            }
+        )
+
+    return execute
+
+
+@agent
+def customer_support_agent() -> Agent:
+    async def execute(state: AgentState) -> AgentState:
+        messages, output = await get_model(
+            "google/gemini-2.5-flash-preview-04-17",
+            api_key=os.getenv("GEMINI_API_KEY"),
+        ).generate_loop(
+            state.messages,
+            tools=[
+                get_customer_order_history(),
+                get_order_status(),
+                get_company_policy(),
+                get_troubleshooting_guide(),
+                escalate_to_human(),
+            ],
+        )
+
+        state.output = output
+        state.messages.extend(messages)
+
+        return state
+
+    return execute
 
 
 # In-Memory History
-# Pydantic AI does not have a built-in memory mechanism yet: https://github.com/pydantic/pydantic-ai/issues/530
-history: dict[str, List[ModelMessage]] = {}
+history: dict[str, AgentState] = {}
 
 
 async def call_agent(message: str, context: dict[str, Any]) -> dict[str, Any]:
-    thread_id = context["thread_id"]
-    if thread_id not in history:
-        history[thread_id] = []
+    thread_id = str(context["thread_id"])
+    first_message = thread_id not in history
+    messages = (
+        [ChatMessageSystem(content=SYSTEM_PROMPT)]
+        if first_message
+        else history[thread_id].messages
+    ) + [ChatMessageUser(content=message)]
 
-    async with agent.iter(
-        message,
-        message_history=history[thread_id],
-    ) as agent_run:
-        next_node = agent_run.next_node  # start with the first node
-        nodes = [next_node]
-        while not isinstance(next_node, End):
-            next_node = await agent_run.next(next_node)
-            nodes.append(next_node)
+    agent_state = await run(customer_support_agent(), messages)
 
-        if not agent_run.result:
-            raise Exception("No result from agent")
+    new_messages = agent_state.messages[2 if first_message else len(messages) - 1 :]
+    history[thread_id] = agent_state
 
-        new_messages = agent_run.result.new_messages()
-        for message_ in new_messages:
-            for part in message_.parts:
-                if isinstance(part, UserPromptPart) and part.content == message:
-                    part.content = message
-
-        history[thread_id] += new_messages
-
-        new_messages_openai_format = await OpenAIModel(
-            "any", provider=OpenAIProvider(api_key="bogus")
-        )._map_messages(new_messages)
-        return {"messages": new_messages_openai_format}
+    return {"messages": await openai_chat_messages(new_messages)}
