@@ -13,7 +13,7 @@ from create_agent_app.common.cutomer_support.mocked_apis import (
 )
 
 from inspect_ai.agent import Agent, AgentState, agent, run
-from inspect_ai.model import ChatMessageSystem, ChatMessageUser, get_model
+from inspect_ai.model import ChatMessage, ChatMessageSystem, ChatMessageUser, get_model
 from inspect_ai.tool import tool, ToolResult
 from inspect_ai.model._openai import openai_chat_messages
 
@@ -191,7 +191,7 @@ def customer_support_agent() -> Agent:
         )
 
         state.output = output
-        state.messages.extend(messages)
+        state.messages = messages
 
         return state
 
@@ -199,21 +199,19 @@ def customer_support_agent() -> Agent:
 
 
 # In-Memory History
-history: dict[str, AgentState] = {}
+history: dict[str, list[ChatMessage]] = {}
 
 
 async def call_agent(message: str, context: dict[str, Any]) -> dict[str, Any]:
     thread_id = str(context["thread_id"])
-    first_message = thread_id not in history
     messages = (
         [ChatMessageSystem(content=SYSTEM_PROMPT)]
-        if first_message
-        else history[thread_id].messages
+        if thread_id not in history
+        else history[thread_id]
     ) + [ChatMessageUser(content=message)]
 
     agent_state = await run(customer_support_agent(), messages)
 
-    new_messages = agent_state.messages[2 if first_message else len(messages) - 1 :]
-    history[thread_id] = agent_state
+    history[thread_id] = messages + agent_state.messages
 
-    return {"messages": await openai_chat_messages(new_messages)}
+    return {"messages": await openai_chat_messages(agent_state.messages)}
