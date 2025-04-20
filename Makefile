@@ -1,19 +1,30 @@
-EXAMPLE_DIRS = langgraph_functional_api_example langgraph_highlevel_api_example pydantic_ai_example google_adk_example inspect_ai_example
+EXAMPLE_DIRS = dspy_example inspect_ai_example google_adk_example langgraph_functional_api_example langgraph_highlevel_api_example pydantic_ai_example
 
 test:
 	@if [ -z "$(filter-out $@,$(MAKECMDGOALS))" ]; then \
-		echo "No arguments provided, running tests in default directories..."; \
+		echo "Running tests in all directories..."; \
 		for dir in $(EXAMPLE_DIRS); do \
-			echo "--- Running tests in $$dir ---"; \
-			uv run pytest -s $$dir || exit 1; \
+			echo "-> Running $$dir tests"; \
+			cd $$dir; \
+			uv run pytest -s || exit 1; \
+			cd ..; \
 		done; \
 	else \
 		args="$(filter-out $@,$(MAKECMDGOALS))"; \
-		uv run pytest -s $$args; \
+		echo "Running $$args tests"; \
+		cd $$args; \
+		uv run pytest -s || exit 1; \
+		cd ..; \
 	fi
 
 install: ensure-uv
-	uv sync --all-packages --all-extras
+	uv sync --all-extras
+	for dir in $(EXAMPLE_DIRS); do \
+		cd $$dir; \
+		echo "-> Installing $$dir dependencies"; \
+		uv sync --all-extras; \
+		cd ..; \
+	done
 
 ensure-uv:
 	@if ! command -v uv &> /dev/null; then \

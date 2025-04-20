@@ -170,6 +170,11 @@ wheels = [
 ]
 
 [[package]]
+name = "create-agent-app"
+version = "0.1.0"
+source = { editable = "../" }
+
+[[package]]
 name = "distro"
 version = "1.9.0"
 source = { registry = "https://pypi.org/simple" }
@@ -638,10 +643,11 @@ wheels = [
 ]
 
 [[package]]
-name = "langgraph-highlevel-api"
+name = "langgraph-highlevel-api-example"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "create-agent-app" },
     { name = "langchain" },
     { name = "langchain-google-genai" },
     { name = "langgraph" },
@@ -652,10 +658,11 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "create-agent-app", editable = "../" },
     { name = "langchain", specifier = ">=0.3.23" },
     { name = "langchain-google-genai", specifier = ">=2.1.3" },
     { name = "langgraph", specifier = ">=0.3.31" },
-    { name = "langwatch-scenario", specifier = ">=0.1.1" },
+    { name = "langwatch-scenario", specifier = ">=0.1.2" },
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
 ]
@@ -706,7 +713,7 @@ wheels = [
 
 [[package]]
 name = "langwatch-scenario"
-version = "0.1.1"
+version = "0.1.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "joblib" },
@@ -719,9 +726,9 @@ dependencies = [
     { name = "termcolor" },
     { name = "wrapt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8d/a1/59a0ac0660b0d5be806f10451e13ae002e3074acf15860dc3e0a8df69e97/langwatch_scenario-0.1.1.tar.gz", hash = "sha256:fdb5f61054284b457edf0c291b7db3beb516cb7ae6b508272d8081fcab129c3e", size = 14628 }
+sdist = { url = "https://files.pythonhosted.org/packages/af/fe/91b785a7d9bdb9b804bb19278c59d279143c88eb2b629a63072ae4a96ec8/langwatch_scenario-0.1.2.tar.gz", hash = "sha256:6a7b3b5aefacd361c8d9390bd1a1f76c6855bd3bb34e85545e391c2d97f68740", size = 15224 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/14/8a/8dd125df063b155b9bc8095e3d20f697238284a4f1285614cb0c6dacac62/langwatch_scenario-0.1.1-py3-none-any.whl", hash = "sha256:913e981cc0e812cf6e8565055f2b09d5164646911f4e1b882dbba9d8ad35c697", size = 17895 },
+    { url = "https://files.pythonhosted.org/packages/81/79/436a3a7cb65d112c03bcc0918c458f22f52cbbbe68a89d8dbcee3e541a28/langwatch_scenario-0.1.2-py3-none-any.whl", hash = "sha256:a82c4705887b9f0d884cb5d78457db489a25e3f3ca911eaf717ab093607f9702", size = 18521 },
 ]
 
 [[package]]

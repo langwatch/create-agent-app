@@ -1,0 +1,66 @@
+{
+  "folders": [
+    {
+      "path": "."
+    },
+    {
+      "path": "dspy_example"
+    },
+    {
+      "path": "inspect_ai_example"
+    },
+    {
+      "path": "google_adk_example"
+    },
+    {
+      "path": "langgraph_functional_api_example"
+    },
+    {
+      "path": "langgraph_highlevel_api_example"
+    },
+    {
+      "path": "pydantic_ai_example"
+    }
+  ],
+  "settings": {
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+    "folders": [
+      {
+        "path": "dspy_example",
+        "settings": {
+          "python.defaultInterpreterPath": "${workspaceFolder:dspy_example}/.venv/bin/python"
+        }
+      },
+      {
+        "path": "inspect_ai_example",
+        "settings": {
+          "python.defaultInterpreterPath": "${workspaceFolder:inspect_ai_example}/.venv/bin/python"
+        }
+      },
+      {
+        "path": "google_adk_example",
+        "settings": {
+          "python.defaultInterpreterPath": "${workspaceFolder:google_adk_example}/.venv/bin/python"
+        }
+      },
+      {
+        "path": "langgraph_functional_api_example",
+        "settings": {
+          "python.defaultInterpreterPath": "${workspaceFolder:langgraph_functional_api_example}/.venv/bin/python"
+        }
+      },
+      {
+        "path": "langgraph_highlevel_api_example",
+        "settings": {
+          "python.defaultInterpreterPath": "${workspaceFolder:langgraph_highlevel_api_example}/.venv/bin/python"
+        }
+      },
+      {
+        "path": "pydantic_ai_example",
+        "settings": {
+          "python.defaultInterpreterPath": "${workspaceFolder:pydantic_ai_example}/.venv/bin/python"
+        }
+      }
+    ]
+  }
+}

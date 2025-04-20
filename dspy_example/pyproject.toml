@@ -1,13 +1,12 @@
 [project]
-name = "inspect-ai-example"
+name = "dspy-example"
 version = "0.1.0"
-description = "Inspect AI example"
+description = "DSPy example"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "create-agent-app",
-    "google-genai>=1.11.0",
-    "inspect-ai>=0.3.89",
+    "dspy>=2.6.18",
     "langwatch-scenario>=0.1.2",
     "pytest>=8.3.5",
     "python-dotenv>=1.1.0",
