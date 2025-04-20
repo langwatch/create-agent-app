@@ -1,9 +1,12 @@
-from typing import Any
+import sys
+
+sys.path.append("..")
+
 import uuid
 import pytest
 
 from scenario import Scenario, TestingAgent
-from langgraph_highlevel_api.customer_support_agent import call_agent
+from langgraph_functional_api_example.customer_support_agent import call_agent
 
 Scenario.configure(
     testing_agent=TestingAgent(model="gemini/gemini-2.5-flash-preview-04-17"),
@@ -22,7 +25,7 @@ async def test_get_order_status():
         ],
         failure_criteria=[
             "The agent says it does not have access to the user's order history",
-            "Agent should not ask for the order id",
+            "Agent should not ask for the order id without giving the user options to choose from",
         ],
     )
 
@@ -42,8 +45,9 @@ async def test_get_customer_asking_for_a_refund():
         ],
         failure_criteria=[
             "The agent says it does not have access to the user's order history",
-            "Agent should not ask for the order id",
+            "Agent should not ask for the order id without giving the user options to choose from",
         ],
+        max_turns=4,
     )
 
     await scenario.run({"thread_id": uuid.uuid4()})

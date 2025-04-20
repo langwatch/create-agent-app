@@ -1,5 +1,5 @@
 [project]
-name = "langgraph-highlevel-api"
+name = "langgraph-functional-api-example"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
