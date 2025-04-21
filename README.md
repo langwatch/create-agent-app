@@ -43,7 +43,14 @@ In alphabetical order:
 - [LangGraph (High-level API)](https://github.com/langchain-ai/langgraph)
 - [Pydantic AI](https://github.com/pydantic/pydantic-ai)
 
+Coming up soon:
+
+- [ ] Smolagents
+- [ ] Agno
+
 All examples are using the same `gemini-2.5-flash-preview-04-17` model from Google and pass the same [Scenario](https://github.com/langwatch/scenario) tests which uses the same model for verification.
+
+Feel free to [open an issue](https://github.com/langwatch/create-agent-app/issues) and request others!
 
 ## Agent Examples
 
