@@ -13,3 +13,4 @@ wheels/
 .env
 
 .pytest_cache
+pytestdebug.log

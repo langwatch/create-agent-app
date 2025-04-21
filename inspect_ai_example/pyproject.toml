@@ -8,7 +8,7 @@ dependencies = [
     "create-agent-app",
     "google-genai>=1.11.0",
     "inspect-ai>=0.3.89",
-    "langwatch-scenario>=0.1.2",
+    "langwatch-scenario>=0.1.3",
     "pytest>=8.3.5",
     "python-dotenv>=1.1.0",
 ]

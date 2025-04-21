@@ -9,7 +9,7 @@ dependencies = [
     "langchain>=0.3.23",
     "langchain-google-genai>=2.1.3",
     "langgraph>=0.3.31",
-    "langwatch-scenario>=0.1.2",
+    "langwatch-scenario>=0.1.3",
     "pytest>=8.3.5",
     "python-dotenv>=1.1.0",
 ]
