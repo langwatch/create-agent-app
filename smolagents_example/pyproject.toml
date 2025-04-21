@@ -1,0 +1,16 @@
+[project]
+name = "smolagents-example"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "create-agent-app",
+    "langwatch-scenario>=0.1.3",
+    "pytest>=8.3.5",
+    "python-dotenv>=1.1.0",
+    "smolagents>=1.14.0",
+]
+
+[tool.uv.sources]
+create-agent-app = { path = "../", editable = true }

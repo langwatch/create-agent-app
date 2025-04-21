@@ -20,6 +20,9 @@
     },
     {
       "path": "pydantic_ai_example"
+    },
+    {
+      "path": "smolagents_example"
     }
   ],
   "settings": {
@@ -59,6 +62,12 @@
         "path": "pydantic_ai_example",
         "settings": {
           "python.defaultInterpreterPath": "${workspaceFolder:pydantic_ai_example}/.venv/bin/python"
+        }
+      },
+      {
+        "path": "smolagents_example",
+        "settings": {
+          "python.defaultInterpreterPath": "${workspaceFolder:smolagents_example}/.venv/bin/python"
         }
       }
     ]

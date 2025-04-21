@@ -42,11 +42,12 @@ In alphabetical order:
 - [LangGraph (Functional API)](https://langchain-ai.github.io/langgraph/concepts/functional_api/)
 - [LangGraph (High-level API)](https://github.com/langchain-ai/langgraph)
 - [Pydantic AI](https://github.com/pydantic/pydantic-ai)
+- [smolagents](https://github.com/huggingface/smolagents)
 
 Coming up soon:
 
-- [ ] Smolagents
 - [ ] Agno
+- [ ] AutoGen
 
 All examples are using the same `gemini-2.5-flash-preview-04-17` model from Google and pass the same [Scenario](https://github.com/langwatch/scenario) tests which uses the same model for verification.
 
