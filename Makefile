@@ -1,4 +1,4 @@
-EXAMPLE_DIRS = dspy_example inspect_ai_example google_adk_example langgraph_functional_api_example langgraph_highlevel_api_example pydantic_ai_example
+EXAMPLE_DIRS = dspy_example inspect_ai_example google_adk_example langgraph_functional_api_example langgraph_highlevel_api_example pydantic_ai_example smolagents_example agno_example
 
 test:
 	@if [ -z "$(filter-out $@,$(MAKECMDGOALS))" ]; then \

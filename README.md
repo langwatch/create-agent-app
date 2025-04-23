@@ -36,6 +36,7 @@ uv run pytest -s tests/test_customer_support_agent.py --debug
 
 In alphabetical order:
 
+- [Agno](https://github.com/agno-ai/agno)
 - [DSPy](https://github.com/stanfordnlp/dspy)
 - [Google ADK](https://github.com/google/adk-python)
 - [InspectAI](https://github.com/UKGovernmentBEIS/inspect_ai)

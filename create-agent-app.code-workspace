@@ -23,6 +23,9 @@
     },
     {
       "path": "smolagents_example"
+    },
+    {
+      "path": "agno_example"
     }
   ],
   "settings": {
@@ -68,6 +71,12 @@
         "path": "smolagents_example",
         "settings": {
           "python.defaultInterpreterPath": "${workspaceFolder:smolagents_example}/.venv/bin/python"
+        }
+      },
+      {
+        "path": "agno_example",
+        "settings": {
+          "python.defaultInterpreterPath": "${workspaceFolder:agno_example}/.venv/bin/python"
         }
       }
     ]
