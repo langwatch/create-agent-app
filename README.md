@@ -42,13 +42,14 @@ In alphabetical order:
 - [InspectAI](https://github.com/UKGovernmentBEIS/inspect_ai)
 - [LangGraph (Functional API)](https://langchain-ai.github.io/langgraph/concepts/functional_api/)
 - [LangGraph (High-level API)](https://github.com/langchain-ai/langgraph)
+- No Framework (just [litellm](https://github.com/BerriAI/litellm) and a loop)
 - [Pydantic AI](https://github.com/pydantic/pydantic-ai)
 - [smolagents](https://github.com/huggingface/smolagents)
 
 Coming up soon:
 
-- [ ] Agno
 - [ ] AutoGen
+- [ ] Mastra
 
 All examples are using the same `gemini-2.5-flash-preview-04-17` model from Google and pass the same [Scenario](https://github.com/langwatch/scenario) tests which uses the same model for verification.
 

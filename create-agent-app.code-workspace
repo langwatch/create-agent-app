@@ -26,6 +26,9 @@
     },
     {
       "path": "agno_example"
+    },
+    {
+      "path": "no_framework_example"
     }
   ],
   "settings": {
@@ -77,6 +80,12 @@
         "path": "agno_example",
         "settings": {
           "python.defaultInterpreterPath": "${workspaceFolder:agno_example}/.venv/bin/python"
+        }
+      },
+      {
+        "path": "no_framework_example",
+        "settings": {
+          "python.defaultInterpreterPath": "${workspaceFolder:no_framework_example}/.venv/bin/python"
         }
       }
     ]
