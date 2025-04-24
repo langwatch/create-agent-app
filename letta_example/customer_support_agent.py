@@ -121,8 +121,7 @@ def get_company_policy() -> "DocumentResponse":
 
 
 def get_troubleshooting_guide(
-    #guide: Literal["internet", "mobile", "television", "ecommerce"],
-    guide: str,
+    guide: Literal["internet", "mobile", "television", "ecommerce"],
 ) -> "DocumentResponse":
     """
     Get the troubleshooting guide
