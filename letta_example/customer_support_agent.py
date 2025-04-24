@@ -159,7 +159,8 @@ get_company_policy_tool = client.tools.upsert_from_function(
     func=get_company_policy
 )
 get_troubleshooting_guide_tool = client.tools.upsert_from_function(
-    func=get_troubleshooting_guide
+    func=get_troubleshooting_guide, 
+    return_char_limit=20000 # seems to require a big return
 )
 escalate_to_human_tool = client.tools.upsert_from_function(
     func=escalate_to_human
@@ -179,8 +180,8 @@ agent = client.agents.create(
             "value": human,
         }
     ], 
-    model="openai/gpt-4.1",
-    embedding="openai/text-embedding-ada-002",
+    model="google_ai/gemini-2.5-pro-exp-03-25",
+    embedding="google_ai/gemini-embedding-exp",
     tool_ids=[
         get_customer_order_history_tool.id,
         get_order_status_tool.id,
@@ -189,8 +190,7 @@ agent = client.agents.create(
         escalate_to_human_tool.id,
     ]
 )
-
-# message the agent with streaming 
+    
 for message in client.agents.messages.create_stream(
     agent_id=agent.id,
     messages=[
@@ -200,4 +200,20 @@ for message in client.agents.messages.create_stream(
         }
     ]
 ):
-    print(message)
+    if message.message_type == "reasoning_message": 
+        print("🧠 Reasoning: " + message.reasoning) 
+    elif message.message_type == "assistant_message": 
+        print("🤖 Agent: " + message.content) 
+    elif message.message_type == "tool_call_message": 
+        print("🔧 Tool Call: " + message.tool_call.name +  \
+              "\n" + message.tool_call.arguments)
+    elif message.message_type == "tool_return_message": 
+        print("🔧 Tool Return: " + message.tool_return)
+    elif message.message_type == "user_message": 
+        print("👤 User Message: " + message.content)
+    elif message.message_type == "system_message": 
+        print(" System Message: " + message.content)
+    elif message.message_type == "usage_statistics": 
+        # for streaming specifically, we send the final 
+        # chunk that contains the usage statistics 
+        print(f"Usage: [{message}]")
