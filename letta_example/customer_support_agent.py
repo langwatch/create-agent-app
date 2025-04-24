@@ -160,9 +160,9 @@ get_order_status_tool = client.tools.upsert_from_function(
 get_company_policy_tool = client.tools.upsert_from_function(
     func=get_company_policy
 )
-# get_troubleshooting_guide_tool = client.tools.upsert_from_function(
-#    func=get_troubleshooting_guide
-#)
+get_troubleshooting_guide_tool = client.tools.upsert_from_function(
+    func=get_troubleshooting_guide
+)
 escalate_to_human_tool = client.tools.upsert_from_function(
     func=escalate_to_human
 )
@@ -187,7 +187,7 @@ agent = client.agents.create(
         get_customer_order_history_tool.id,
         get_order_status_tool.id,
         get_company_policy_tool.id,
-        # get_troubleshooting_guide_tool.id,
+        get_troubleshooting_guide_tool.id,
         escalate_to_human_tool.id,
     ]
 )
