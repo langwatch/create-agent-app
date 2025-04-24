@@ -92,7 +92,7 @@ def get_customer_order_history() -> "List[OrderSummaryResponse]":
     Returns:
         The customer order history
     """
-    from mocked_apis import http_GET_customer_order_history 
+    from create_agent_app.common.cutomer_support.mocked_apis import http_GET_customer_order_history
     return http_GET_customer_order_history()
 
 
@@ -106,7 +106,7 @@ def get_order_status(order_id: str) -> "OrderStatusResponse":
     Returns:
         The status of the order
     """
-    from mocked_apis import http_GET_order_status 
+    from create_agent_app.common.cutomer_support.mocked_apis import http_GET_order_status 
     return http_GET_order_status(order_id)
 
 
@@ -117,24 +117,25 @@ def get_company_policy() -> "DocumentResponse":
     Returns:
         The company policy document
     """
-    from mocked_apis import http_GET_company_policy 
+    from create_agent_app.common.cutomer_support.mocked_apis import http_GET_company_policy 
     return http_GET_company_policy()
 
 
-#def get_troubleshooting_guide(
-#    guide: Literal["internet", "mobile", "television", "ecommerce"],
-#) -> "DocumentResponse":
-#    """
-#    Get the troubleshooting guide
-#
-#    Args:
-#        guide: The guide to get the troubleshooting guide for, one of "internet", "mobile", "television", "ecommerce"
-#
-#    Returns:
-#        The troubleshooting guide document
-#    """
-#    from mocked_apis import http_GET_troubleshooting_guide 
-#    return http_GET_troubleshooting_guide(guide)
+def get_troubleshooting_guide(
+    #guide: Literal["internet", "mobile", "television", "ecommerce"],
+    guide: str,
+) -> "DocumentResponse":
+    """
+    Get the troubleshooting guide
+
+    Args:
+        guide: The guide to get the troubleshooting guide for, one of "internet", "mobile", "television", "ecommerce"
+
+    Returns:
+        The troubleshooting guide document
+    """
+    from create_agent_app.common.cutomer_support.mocked_apis import http_GET_troubleshooting_guide 
+    return http_GET_troubleshooting_guide(guide)
 
 
 def escalate_to_human() -> dict[str, str]:
