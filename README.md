@@ -60,9 +60,9 @@ Feel free to [open an issue](https://github.com/langwatch/create-agent-app/issue
 The goal is to have examples that cover all the LLM workflows and Agent examples listed on the [Building Effective Agents](https://www.anthropic.com/engineering/building-effective-agents) guide by Anthropic, as those are real practical examples of what's actually mostly being built with LLMs right now.
 
 - Agent: Tools Loop
-  - [x] Customer Support Agent
-  - [ ] Coding Agent
-  - [ ] Deep Search Agent (using MCP)
+  - [x] Customer Support Agent (all frameworks)
+  - [x] Vibe Coding Agent (implemented in: pydantic ai, others pending)
+  - [ ] Deep Search MCP Agent
 - Workflow: Prompt Chaining
   - [ ] Marketing Copy with Translation
   - [ ] Document Outline Writing
