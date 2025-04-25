@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "create-agent-app",
-    "langwatch-scenario>=0.1.1",
+    "langwatch-scenario>=0.1.3",
     "pydantic-ai>=0.1.3",
     "pytest>=8.3.5",
     "python-dotenv>=1.1.0",

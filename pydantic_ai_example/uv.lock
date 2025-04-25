@@ -551,7 +551,7 @@ wheels = [
 
 [[package]]
 name = "langwatch-scenario"
-version = "0.1.1"
+version = "0.1.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "joblib" },
@@ -564,9 +564,9 @@ dependencies = [
     { name = "termcolor" },
     { name = "wrapt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8d/a1/59a0ac0660b0d5be806f10451e13ae002e3074acf15860dc3e0a8df69e97/langwatch_scenario-0.1.1.tar.gz", hash = "sha256:fdb5f61054284b457edf0c291b7db3beb516cb7ae6b508272d8081fcab129c3e", size = 14628 }
+sdist = { url = "https://files.pythonhosted.org/packages/17/df/d1769ac6b2f43ee353b47c22f640f6de7c6d634535374d6bd4d73197ac1d/langwatch_scenario-0.1.3.tar.gz", hash = "sha256:7716170bae11cfc492456a6128902aa8c914ed988d9c0d883f61e1d4130ddc78", size = 15425 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/14/8a/8dd125df063b155b9bc8095e3d20f697238284a4f1285614cb0c6dacac62/langwatch_scenario-0.1.1-py3-none-any.whl", hash = "sha256:913e981cc0e812cf6e8565055f2b09d5164646911f4e1b882dbba9d8ad35c697", size = 17895 },
+    { url = "https://files.pythonhosted.org/packages/78/96/486858a4a8595b5bb738b622ae41e1ce9b11396026339a0aec3a39973eaa/langwatch_scenario-0.1.3-py3-none-any.whl", hash = "sha256:216479dd878e4101372b75e627585acfd18ae8ecb249b3616b33a50306f987b5", size = 18750 },
 ]
 
 [[package]]
@@ -893,7 +893,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "create-agent-app", editable = "../" },
-    { name = "langwatch-scenario", specifier = ">=0.1.1" },
+    { name = "langwatch-scenario", specifier = ">=0.1.3" },
     { name = "pydantic-ai", specifier = ">=0.1.3" },
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
