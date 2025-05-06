@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XPTO Telecom Support</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 h-screen flex flex-col">
+    <header class="bg-blue-600 text-white p-4">
+        <h1 class="text-xl font-bold">XPTO Telecom Customer Support</h1>
+    </header>
+
+    <main class="flex-1 flex flex-col p-4 max-w-3xl mx-auto w-full">
+        <div id="chat-container" class="flex-1 overflow-auto mb-4 bg-white rounded-lg shadow p-4 space-y-4">
+            <div class="bg-blue-100 p-3 rounded-lg max-w-3/4 ml-auto">
+                <p class="text-sm text-gray-700">Hello! I'm your XPTO Telecom support assistant. How can I help you
+                    today?</p>
+            </div>
+        </div>
+
+        <div class="flex">
+            <input id="message-input" type="text" placeholder="Type your message..."
+                class="flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button id="send-button"
+                class="bg-blue-600 text-white px-4 py-2 rounded-r-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Send
+            </button>
+        </div>
+    </main>
+
+    <script>
+        // Generate a unique thread ID for this session
+        const threadId = 'thread_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        const chatContainer = document.getElementById('chat-container');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+
+        // Add event listeners
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Clear input
+            messageInput.value = '';
+
+            // Add user message to chat
+            addMessageToChat(message, 'user');
+
+            // Add typing indicator
+            const typingIndicator = addTypingIndicator();
+
+            try {
+                // Send message to server
+                const response = await fetch('/worker', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message,
+                        thread_id: threadId
+                    })
+                });
+
+                // Remove typing indicator
+                typingIndicator.remove();
+
+                if (!response.ok) {
+                    throw new Error('Server error');
+                }
+
+                const data = await response.json();
+
+                // Process the response messages
+                if (data.messages && data.messages.length) {
+                    // Find the last assistant message
+                    const assistantMessages = data.messages.filter(msg =>
+                        msg.role === 'assistant' && msg.content
+                    );
+
+                    if (assistantMessages.length) {
+                        // Display the last assistant message
+                        const lastMessage = assistantMessages[assistantMessages.length - 1];
+                        addMessageToChat(lastMessage.content, 'assistant');
+                    }
+                }
+            } catch (error) {
+                // Remove typing indicator
+                typingIndicator.remove();
+
+                // Show error message
+                addMessageToChat('Sorry, there was an error processing your request.', 'error');
+                console.error(error);
+            }
+        }
+
+        function addMessageToChat(content, role) {
+            const messageDiv = document.createElement('div');
+
+            if (role === 'user') {
+                messageDiv.className = 'bg-gray-100 p-3 rounded-lg max-w-3/4';
+            } else if (role === 'assistant') {
+                messageDiv.className = 'bg-blue-100 p-3 rounded-lg max-w-3/4 ml-auto';
+            } else {
+                messageDiv.className = 'bg-red-100 p-3 rounded-lg max-w-3/4 mx-auto';
+            }
+
+            // Convert markdown-like formatting
+            let formattedContent = content
+                // Bold text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                // Italic text
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                // Handle line breaks
+                .replace(/\n/g, '<br>');
+
+            messageDiv.innerHTML = `<p class="text-sm text-gray-700">${formattedContent}</p>`;
+            chatContainer.appendChild(messageDiv);
+
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function addTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'bg-blue-50 p-3 rounded-lg max-w-3/4 ml-auto flex';
+            typingDiv.innerHTML = `
+        <span class="w-2 h-2 bg-blue-600 rounded-full mx-1 animate-pulse"></span>
+        <span class="w-2 h-2 bg-blue-600 rounded-full mx-1 animate-pulse" style="animation-delay: 0.2s"></span>
+        <span class="w-2 h-2 bg-blue-600 rounded-full mx-1 animate-pulse" style="animation-delay: 0.4s"></span>
+      `;
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return typingDiv;
+        }
+    </script>
+</body>
+
+</html>

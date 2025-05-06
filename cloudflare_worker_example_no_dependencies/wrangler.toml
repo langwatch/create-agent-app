@@ -1,0 +1,7 @@
+name = "cloudflare-worker-no-deps-example"
+compatibility_date = "2025-04-21"
+dev.port = 3000
+assets = { binding = "ASSETS",directory = "./knowledge_base" }
+main="index.js"
+route.pattern = "agent-app-cloudflare.wilmake.com"
+route.custom_domain = true
