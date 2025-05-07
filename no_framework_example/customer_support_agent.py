@@ -1,7 +1,5 @@
-import inspect
 import json
-import os
-from typing import Any, List, Literal, get_type_hints
+from typing import Any, List, Literal
 import dotenv
 
 dotenv.load_dotenv()
@@ -18,8 +16,7 @@ from create_agent_app.common.cutomer_support.mocked_apis import (
 import litellm
 from litellm import Choices, Message, cast
 from litellm.types.utils import ModelResponse
-from pydantic import Field, create_model
-from pydantic.json_schema import model_json_schema
+from function_schema import get_function_schema
 
 
 SYSTEM_PROMPT = """
@@ -144,41 +141,6 @@ def escalate_to_human() -> dict[str, str]:
     }
 
 
-def function_to_schema(func):
-    """
-    Utility to convert a function to OpenAI tool call schema
-    """
-    signature = inspect.signature(func)
-    docstring = inspect.getdoc(func) or ""
-
-    # Extract description from docstring
-    description = docstring.split("\n\n")[0].strip()
-
-    # Get type hints
-    type_hints = get_type_hints(func)
-
-    # Create field definitions for the parameters
-    fields = {}
-    for param_name in signature.parameters.keys():
-        param_type = type_hints.get(param_name, str)
-        fields[param_name] = (param_type, Field(description=f"Parameter {param_name}"))
-
-    # Create a Pydantic model for the function parameters
-    model = create_model(f"{func.__name__}Parameters", **fields)
-
-    # Generate the JSON schema
-    schema = model_json_schema(model)
-
-    return {
-        "type": "function",
-        "function": {
-            "name": func.__name__,
-            "description": description,
-            "parameters": schema,
-        },
-    }
-
-
 # In-memory history
 history: dict[str, List[Message]] = {}
 
@@ -214,7 +176,7 @@ def call_agent(message: str, context: dict[str, Any]) -> dict[str, Any]:
                     + history[thread_id]
                     + new_messages
                 ),
-                tools=[function_to_schema(tool) for tool in tools],
+                tools=[get_function_schema(tool) for tool in tools],
             ),
         )
         message_ = cast(Message, cast(Choices, response.choices[0]).message)
