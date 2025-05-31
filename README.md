@@ -67,7 +67,7 @@ In alphabetical order:
 | Framework                                               | Customer Support Agent                                                                                                                    | Vibe Coding Agent |
 | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
 | [Mastra](https://github.com/mastra-ai/mastra)           | [Code](./mastra_example/mastra/agents/customer-support-agent.ts) \| [Test](./mastra_example/mastra/agents/customer-support-agent.test.ts) |                   |
-| Pure JavaScript, zero dependencies (Cloudflare Workers) | [Code](./cloudflare_workers_example_no_dependencies/index.js)                                                                             |                   |
+| Pure JavaScript, zero dependencies (Cloudflare Workers) | [Code](./cloudflare_worker_example_no_dependencies/index.js)                                                                             |                   |
 
 Coming up soon (help wanted!):
 
