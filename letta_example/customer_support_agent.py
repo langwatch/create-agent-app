@@ -1,5 +1,5 @@
 """
-Letta is a framework for building persistent agents that have the ability to learn over time. 
+Letta is a framework for building persistent agents that have the ability to learn over time.
 Unlike other frameworks, Letta runs as a service and agents are stored in a database.
 
 Before running this script, make sure you start the Letta server by running `bash run.sh`.
@@ -11,7 +11,7 @@ from typing import List, Literal
 client = Letta(base_url="http://localhost:8283")
 # client = Letta(api_key="your_api_key") # if you have an API key
 
-human = "" # starter information about the human 
+human = "" # starter information about the human
 
 # NOTE: this can also be appended to the default system prompt if we don't want it to be editable over time
 persona = """<Introduction>
@@ -91,7 +91,7 @@ def get_customer_order_history() -> "List[OrderSummaryResponse]":
     Returns:
         The customer order history
     """
-    from create_agent_app.common.cutomer_support.mocked_apis import http_GET_customer_order_history
+    from create_agent_app.common.customer_support.mocked_apis import http_GET_customer_order_history
     return http_GET_customer_order_history()
 
 
@@ -105,7 +105,7 @@ def get_order_status(order_id: str) -> "OrderStatusResponse":
     Returns:
         The status of the order
     """
-    from create_agent_app.common.cutomer_support.mocked_apis import http_GET_order_status 
+    from create_agent_app.common.customer_support.mocked_apis import http_GET_order_status
     return http_GET_order_status(order_id)
 
 
@@ -116,7 +116,7 @@ def get_company_policy() -> "DocumentResponse":
     Returns:
         The company policy document
     """
-    from create_agent_app.common.cutomer_support.mocked_apis import http_GET_company_policy 
+    from create_agent_app.common.customer_support.mocked_apis import http_GET_company_policy
     return http_GET_company_policy()
 
 
@@ -132,7 +132,7 @@ def get_troubleshooting_guide(
     Returns:
         The troubleshooting guide document
     """
-    from create_agent_app.common.cutomer_support.mocked_apis import http_GET_troubleshooting_guide 
+    from create_agent_app.common.customer_support.mocked_apis import http_GET_troubleshooting_guide
     return http_GET_troubleshooting_guide(guide)
 
 
@@ -159,27 +159,27 @@ get_company_policy_tool = client.tools.upsert_from_function(
     func=get_company_policy
 )
 get_troubleshooting_guide_tool = client.tools.upsert_from_function(
-    func=get_troubleshooting_guide, 
+    func=get_troubleshooting_guide,
     return_char_limit=20000 # seems to require a big return
 )
 escalate_to_human_tool = client.tools.upsert_from_function(
     func=escalate_to_human
 )
 
-# create the agent 
+# create the agent
 agent = client.agents.create(
-    name="customer_service_agent", 
+    name="customer_service_agent",
     memory_blocks = [
         {
             "label": "persona",
-            "value": persona, 
-            "limit": 10000 
+            "value": persona,
+            "limit": 10000
         },
         {
             "label": "human",
             "value": human,
         }
-    ], 
+    ],
     model="google_ai/gemini-2.5-pro-exp-03-25",
     embedding="google_ai/gemini-embedding-exp",
     tool_ids=[
@@ -190,7 +190,7 @@ agent = client.agents.create(
         escalate_to_human_tool.id,
     ]
 )
-    
+
 for message in client.agents.messages.create_stream(
     agent_id=agent.id,
     messages=[
@@ -200,20 +200,20 @@ for message in client.agents.messages.create_stream(
         }
     ]
 ):
-    if message.message_type == "reasoning_message": 
-        print("🧠 Reasoning: " + message.reasoning) 
-    elif message.message_type == "assistant_message": 
-        print("🤖 Agent: " + message.content) 
-    elif message.message_type == "tool_call_message": 
+    if message.message_type == "reasoning_message":
+        print("🧠 Reasoning: " + message.reasoning)
+    elif message.message_type == "assistant_message":
+        print("🤖 Agent: " + message.content)
+    elif message.message_type == "tool_call_message":
         print("🔧 Tool Call: " + message.tool_call.name +  \
               "\n" + message.tool_call.arguments)
-    elif message.message_type == "tool_return_message": 
+    elif message.message_type == "tool_return_message":
         print("🔧 Tool Return: " + message.tool_return)
-    elif message.message_type == "user_message": 
+    elif message.message_type == "user_message":
         print("👤 User Message: " + message.content)
-    elif message.message_type == "system_message": 
+    elif message.message_type == "system_message":
         print(" System Message: " + message.content)
-    elif message.message_type == "usage_statistics": 
-        # for streaming specifically, we send the final 
-        # chunk that contains the usage statistics 
+    elif message.message_type == "usage_statistics":
+        # for streaming specifically, we send the final
+        # chunk that contains the usage statistics
         print(f"Usage: [{message}]")

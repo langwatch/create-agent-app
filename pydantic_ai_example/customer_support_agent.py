@@ -7,7 +7,7 @@ import dotenv
 
 dotenv.load_dotenv()
 
-from create_agent_app.common.cutomer_support.mocked_apis import (
+from create_agent_app.common.customer_support.mocked_apis import (
     DocumentResponse,
     OrderSummaryResponse,
     OrderStatusResponse,
