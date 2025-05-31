@@ -1,31 +1,44 @@
 {
   "name": "mastra-example",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "mastra dev",
-    "build": "mastra build"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "private": true,
+  "version": "0.0.0",
   "type": "module",
-  "engines": {
-    "node": ">=20.9.0"
+  "scripts": {
+    "dev": "concurrently \"npm run dev:vite\" \"npm run dev:mastra\"",
+    "dev:vite": "vite",
+    "build": "tsc -b && vite build && npm run build:mastra",
+    "dev:mastra": "mastra dev --dir mastra",
+    "build:mastra": "mastra build --dir mastra",
+    "lint": "eslint .",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@ai-sdk/google": "^1.2.18",
+    "@copilotkit/react-core": "^1.8.13",
+    "@copilotkit/react-ui": "^1.8.13",
+    "@copilotkit/runtime": "^1.8.13",
+    "@mastra/agui": "^1.0.2-alpha.2",
+    "@mastra/client-js": "^0.10.1",
     "@mastra/core": "^0.10.1",
     "@mastra/libsql": "^0.10.0",
     "@mastra/loggers": "^0.10.0",
     "@mastra/memory": "^0.10.1",
-    "zod": "^3.25.42"
+    "concurrently": "^9.1.2",
+    "mastra": "^0.10.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "@types/node": "^22.15.29",
-    "mastra": "^0.10.1",
-    "typescript": "^5.8.3"
+    "@eslint/js": "^9.25.0",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react-swc": "^3.9.0",
+    "eslint": "^9.25.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.30.1",
+    "vite": "^6.3.5"
   }
 }

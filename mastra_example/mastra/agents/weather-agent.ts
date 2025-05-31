@@ -1,11 +1,11 @@
-import { google } from '@ai-sdk/google';
-import { Agent } from '@mastra/core/agent';
-import { Memory } from '@mastra/memory';
-import { LibSQLStore } from '@mastra/libsql';
-import { weatherTool } from '../tools/weather-tool';
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { Agent } from "@mastra/core/agent";
+import { LibSQLStore } from "@mastra/libsql";
+import { Memory } from "@mastra/memory";
+import { weatherTool } from "../tools/weather-tool";
 
 export const weatherAgent = new Agent({
-  name: 'Weather Agent',
+  name: "Weather Agent",
   instructions: `
       You are a helpful weather assistant that provides accurate weather information.
 
@@ -18,11 +18,13 @@ export const weatherAgent = new Agent({
 
       Use the weatherTool to fetch current weather data.
 `,
-  model: google('gemini-1.5-pro-latest'),
+  model: createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY }).chat(
+    "gemini-2.5-flash-preview-04-17"
+  ),
   tools: { weatherTool },
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../mastra.db', // path is relative to the .mastra/output directory
+      url: "file:../mastra.db", // path is relative to the .mastra/output directory
     }),
   }),
 });
