@@ -17,39 +17,67 @@ cd inspect_ai_example # or any other example
 Install the dependencies:
 
 ```bash
+# Python Agent
 uv sync --all-groups
+
+# TypeScript Agent
+npm install
 ```
 
 Run the tests to see the agent in action:
 
 ```bash
+# Python Agent
 uv run pytest -s tests/test_customer_support_agent.py
+
+# TypeScript Agent
+npm test
 ```
 
 Or enter the debug mode to chat with the agent yourself:
 
 ```bash
+# Python Agent
 uv run pytest -s tests/test_customer_support_agent.py --debug
+
+# TypeScript Agent
+npm run dev
 ```
 
 ## Frameworks
 
 In alphabetical order:
 
-- [Agno](https://github.com/agno-agi/agno)
-- [DSPy](https://github.com/stanfordnlp/dspy)
-- [Google ADK](https://github.com/google/adk-python)
-- [InspectAI](https://github.com/UKGovernmentBEIS/inspect_ai)
-- [LangGraph (Functional API)](https://langchain-ai.github.io/langgraph/concepts/functional_api/)
-- [LangGraph (High-level API)](https://github.com/langchain-ai/langgraph)
-- No Framework ([litellm](https://github.com/BerriAI/litellm), function_schema utility and a loop)
-- [Pydantic AI](https://github.com/pydantic/pydantic-ai)
-- [smolagents](https://github.com/huggingface/smolagents)
+### <img src="./create_agent_app/priv/python.svg" alt="Python" width="16" height="16"> Python
 
-Coming up soon:
+| Framework                                                                                        | Customer Support Agent                                                                                                                                | Vibe Coding Agent                                                                                                   |
+| ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| [Agno](https://github.com/agno-agi/agno)                                                         | [Code](./agno_example/customer_support_agent.py) \| [Test](./agno_example/tests/test_customer_support_agent.py)                                       |                                                                                                                     |
+| [DSPy](https://github.com/stanfordnlp/dspy)                                                      | [Code](./dspy_example/customer_support_agent.py) \| [Test](./dspy_example/tests/test_customer_support_agent.py)                                       |                                                                                                                     |
+| [Google ADK](https://github.com/google/adk-python)                                               | [Code](./google_adk_example/customer_support_agent.py) \| [Test](./google_adk_example/tests/test_customer_support_agent.py)                           |                                                                                                                     |
+| [InspectAI](https://github.com/UKGovernmentBEIS/inspect_ai)                                      | [Code](./inspect_ai_example/customer_support_agent.py) \| [Test](./inspect_ai_example/tests/test_customer_support_agent.py)                           |                                                                                                                     |
+| [LangGraph (High-level API)](https://github.com/langchain-ai/langgraph)                          | [Code](./langgraph_highlevel_api_example/customer_support_agent.py) \| [Test](./langgraph_highlevel_api_example/tests/test_customer_support_agent.py) |                                                                                                                     |
+| [Letta](https://github.com/letta-ai/letta)                                                       | [Code](./letta_example/customer_support_agent.py)                                                                                                     |                                                                                                                     |
+| No Framework ([litellm](https://github.com/BerriAI/litellm), function_schema utility and a loop) | [Code](./no_framework_example/customer_support_agent.py) \| [Test](./no_framework_example/tests/test_customer_support_agent.py)                       |                                                                                                                     |
+| [Pydantic AI](https://github.com/pydantic/pydantic-ai)                                           | [Code](./pydantic_ai_example/customer_support_agent.py) \| [Test](./pydantic_ai_example/tests/test_customer_support_agent.py)                         | [Code](./pydantic_ai_example/vibe_coding_agent.py) \| [Test](./pydantic_ai_example/tests/test_vibe_coding_agent.py) |
+| [smolagents](https://github.com/huggingface/smolagents)                                          | [Code](./smolagents_example/customer_support_agent.py) \| [Test](./smolagents_example/tests/test_customer_support_agent.py)                           |                                                                                                                     |
 
+### <img src="./create_agent_app/priv/typescript.svg" alt="TypeScript" width="16" height="16"> TypeScript
+
+| Framework                                               | Customer Support Agent                                                                                                                    | Vibe Coding Agent |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| [Mastra](https://github.com/mastra-ai/mastra)           | [Code](./mastra_example/mastra/agents/customer-support-agent.ts) \| [Test](./mastra_example/mastra/agents/customer-support-agent.test.ts) |                   |
+| Pure JavaScript, zero dependencies (Cloudflare Workers) | [Code](./cloudflare_workers_example_no_dependencies/index.js)                                                                             |                   |
+
+Coming up soon (help wanted!):
+
+- [ ] Ax
+- [ ] LangGraph.js
+- [ ] Inngest AgentKit
+- [ ] CrewAI
 - [ ] AutoGen
-- [ ] Mastra
+- [ ] Atomic Agents
+- [ ] OpenAI Agent SDK
 
 All examples are using the same `gemini-2.5-flash-preview-04-17` model from Google and pass the same [Scenario](https://github.com/langwatch/scenario) tests which uses the same model for verification.
 
