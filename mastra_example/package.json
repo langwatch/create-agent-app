@@ -17,6 +17,7 @@
     "@copilotkit/react-core": "^1.8.13",
     "@copilotkit/react-ui": "^1.8.13",
     "@copilotkit/runtime": "^1.8.13",
+    "@langwatch/create-agent-app": "file:../create_agent_app",
     "@mastra/agui": "^1.0.2-alpha.2",
     "@mastra/client-js": "^0.10.1",
     "@mastra/core": "^0.10.1",

@@ -6,7 +6,7 @@ import dotenv
 
 dotenv.load_dotenv()
 
-from create_agent_app.common.cutomer_support.mocked_apis import (
+from create_agent_app.common.customer_support.mocked_apis import (
     http_GET_company_policy,
     http_GET_customer_order_history,
     http_GET_order_status,
