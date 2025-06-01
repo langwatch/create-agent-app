@@ -23,7 +23,11 @@ const sleep = (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-export const httpGETCustomerOrderHistory = (): OrderSummaryResponse[] => {
+export const httpGETCustomerOrderHistory = async (): Promise<
+  OrderSummaryResponse[]
+> => {
+  await sleep(100);
+
   return [
     {
       orderId: "9127412",

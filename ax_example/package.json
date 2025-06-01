@@ -1,0 +1,21 @@
+{
+  "name": "ax_example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "VERBOSE=true dotenv -e .env -- vitest"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@ax-llm/ax": "^11.0.49",
+    "@langwatch/create-agent-app": "file:../create_agent_app"
+  },
+  "devDependencies": {
+    "@langwatch/scenario-ts": "^0.1.0",
+    "dotenv-cli": "^8.0.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
+  }
+}

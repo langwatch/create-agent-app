@@ -1,15 +1,10 @@
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { Agent } from "@mastra/core/agent";
-import { LibSQLStore } from "@mastra/libsql";
-import { Memory } from "@mastra/memory";
+import { AxAgent, AxAI, AxAIGoogleGeminiModel, AxFunction } from "@ax-llm/ax";
 import {
+  httpGETCompanyPolicy,
   httpGETCustomerOrderHistory,
   httpGETOrderStatus,
-  httpGETCompanyPolicy,
   httpGETTroubleshootingGuide,
 } from "@langwatch/create-agent-app";
-import { createTool } from "@mastra/core";
-import { z } from "zod";
 
 const SYSTEM_PROMPT = `
 <Introduction>
@@ -82,103 +77,100 @@ Today is 2025-04-19
 </Info>
 `;
 
-export const getCustomerOrderHistoryTool = createTool({
-  id: "get-customer-order-history",
+export const getCustomerOrderHistoryTool: AxFunction = {
+  name: "getCustomerOrderHistory",
   description: "Get the current customer order history",
-  inputSchema: z.object({}),
-  outputSchema: z.array(
-    z.object({
-      orderId: z.string(),
-      items: z.array(z.string()),
-      totalAmount: z.number(),
-      orderDate: z.string(),
-    })
-  ),
-  execute: async () => {
-    return await httpGETCustomerOrderHistory();
+  func: async () => {
+    return httpGETCustomerOrderHistory();
   },
-});
+  parameters: {
+    type: "object",
+    properties: {},
+  },
+};
 
-export const getOrderStatusTool = createTool({
-  id: "get-order-status",
+export const getOrderStatusTool: AxFunction = {
+  name: "getOrderStatus",
   description: "Get the status of a specific order",
-  inputSchema: z.object({
-    orderId: z.string().describe("The ID of the order to get the status of"),
-  }),
-  outputSchema: z.object({
-    orderId: z.string(),
-    status: z.enum(["pending", "shipped", "delivered", "cancelled"]),
-  }),
-  execute: async ({ context }) => {
-    return await httpGETOrderStatus(context.orderId);
+  func: async ({ orderId }) => {
+    return await httpGETOrderStatus(orderId);
   },
-});
+  parameters: {
+    type: "object",
+    properties: {
+      orderId: {
+        type: "string",
+        description: "The ID of the order to get the status of",
+      },
+    },
+  },
+};
 
-export const getCompanyPolicyTool = createTool({
-  id: "get-company-policy",
+export const getCompanyPolicyTool: AxFunction = {
+  name: "getCompanyPolicy",
   description: "Get the company policy document",
-  inputSchema: z.object({}),
-  outputSchema: z.object({
-    documentId: z.string(),
-    documentName: z.string(),
-    documentContent: z.string(),
-  }),
-  execute: async () => {
+  func: async () => {
     return await httpGETCompanyPolicy();
   },
-});
-
-export const getTroubleshootingGuideTool = createTool({
-  id: "get-troubleshooting-guide",
-  description: "Get the troubleshooting guide for a specific topic",
-  inputSchema: z.object({
-    guide: z
-      .enum(["internet", "mobile", "television", "ecommerce"])
-      .describe("The guide to get the troubleshooting guide for"),
-  }),
-  outputSchema: z.object({
-    documentId: z.string(),
-    documentName: z.string(),
-    documentContent: z.string(),
-  }),
-  execute: async ({ context }) => {
-    return await httpGETTroubleshootingGuide(context.guide);
+  parameters: {
+    type: "object",
+    properties: {},
   },
-});
+};
 
-export const escalateToHumanTool = createTool({
-  id: "escalate-to-human",
+export const getTroubleshootingGuideTool: AxFunction = {
+  name: "getTroubleshootingGuide",
+  description: "Get the troubleshooting guide for a specific topic",
+  func: async ({ guide }) => {
+    return await httpGETTroubleshootingGuide(guide);
+  },
+  parameters: {
+    type: "object",
+    properties: {
+      guide: {
+        type: "string",
+        enum: ["internet", "mobile", "television", "ecommerce"],
+        description: "The guide to get the troubleshooting guide for",
+      },
+    },
+  },
+};
+
+export const escalateToHumanTool: AxFunction = {
+  name: "escalateToHuman",
   description:
     "Escalate to human support, retrieves a link for the customer to open a ticket",
-  inputSchema: z.object({}),
-  outputSchema: z.object({
-    url: z.string(),
-    type: z.literal("escalation"),
-  }),
-  execute: async () => {
+  func: async () => {
     return {
       url: "https://support.xpto.com/tickets",
       type: "escalation" as const,
     };
   },
-});
-
-export const customerSupportAgent = new Agent({
-  name: "Customer Support Agent",
-  instructions: SYSTEM_PROMPT,
-  model: createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY }).chat(
-    "gemini-2.5-flash-preview-04-17"
-  ),
-  tools: {
-    getCustomerOrderHistoryTool,
-    getOrderStatusTool,
-    getCompanyPolicyTool,
-    getTroubleshootingGuideTool,
-    escalateToHumanTool,
+  parameters: {
+    type: "object",
+    properties: {},
   },
-  memory: new Memory({
-    storage: new LibSQLStore({
-      url: "file:../mastra.db", // path is relative to the .mastra/output directory
+};
+
+export const customerSupportAgent = new AxAgent(
+  {
+    name: "Customer Support Agent",
+    description: SYSTEM_PROMPT,
+    signature: `question -> answer`,
+    ai: new AxAI({
+      name: "google-gemini",
+      apiKey: process.env.GEMINI_API_KEY as string,
+      config: {
+        model:
+          "gemini-2.5-flash-preview-04-17" as AxAIGoogleGeminiModel.Gemini25Flash,
+      },
     }),
-  }),
-});
+    functions: [
+      getCustomerOrderHistoryTool,
+      getOrderStatusTool,
+      getCompanyPolicyTool,
+      getTroubleshootingGuideTool,
+      escalateToHumanTool,
+    ],
+  }
+);
