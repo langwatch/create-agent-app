@@ -1,25 +1,29 @@
 import { Scenario, TestableAgent, Verdict } from "@langwatch/scenario-ts";
-import { describe, it, expect } from "vitest";
-import { customerSupportAgent } from "./customer-support-agent";
-import { v4 as uuidv4 } from "uuid";
+import { describe, expect, it } from "vitest";
+import { customerSupportAgent } from "./CustomerSupportAgent";
 
 describe("Customer Support Agent", () => {
   it("gets order status", async () => {
-    const scenario = new Scenario({
-      description: "User asks about the status of their last order",
-      strategy: "",
-      successCriteria: ["The agent replies with the order status"],
-      failureCriteria: [
-        "The agent says it does not have access to the user's order history",
-        "Agent should not ask for the order id without giving the user options to choose from",
-      ],
-    });
+    try {
+      const scenario = new Scenario({
+        description: "User asks about the status of their last order",
+        strategy: "",
+        successCriteria: ["The agent replies with the order status"],
+        failureCriteria: [
+          "The agent says it does not have access to the user's order history",
+          "Agent should not ask for the order id without giving the user options to choose from",
+        ],
+      });
 
-    const agent = new CustomerSupportAgent();
+      const agent = new CustomerSupportAgent();
 
-    const result = await scenario.run({ agent, maxTurns: 10 });
+      const result = await scenario.run({ agent, maxTurns: 10 });
 
-    expect(result.verdict).toBe(Verdict.Success);
+      expect(result.verdict).toBe(Verdict.Success);
+    } catch (error) {
+      console.error(error.cause);
+      throw error;
+    }
   });
 
   it("replies customer asking for a refund", async () => {
@@ -46,20 +50,11 @@ describe("Customer Support Agent", () => {
 });
 
 class CustomerSupportAgent implements TestableAgent {
-  private threadId: string;
-  private resourceId: string;
-
-  constructor() {
-    this.threadId = uuidv4();
-    this.resourceId = uuidv4();
-  }
-
   async invoke(prompt: string) {
-    const result = await customerSupportAgent.generate(prompt, {
-      resourceId: this.resourceId,
-      threadId: this.threadId,
-    });
+    const result = await customerSupportAgent.forward(null, {
+      question: prompt,
+    } as any);
 
-    return { text: result.text };
+    return { text: result.answer as string };
   }
 }
