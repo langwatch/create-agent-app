@@ -25,10 +25,13 @@
     "@mastra/libsql": "^0.10.0",
     "@mastra/loggers": "^0.10.0",
     "@mastra/memory": "^0.10.1",
+    "@tailwindcss/vite": "^4.1.8",
     "concurrently": "^9.1.2",
     "mastra": "^0.10.1",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0",
+    "tailwindcss": "^4.1.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
