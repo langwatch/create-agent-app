@@ -1,0 +1,41 @@
+{
+  "name": "mastra-example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:agent-kit\" \"inngest-cli dev -u http://localhost:3000/api/inngest\"",
+    "build": "tsc -b",
+    "dev:agent-kit": "dotenv -e .env -- tsx ./server.ts",
+    "lint": "eslint .",
+    "test": "VERBOSE=true dotenv -e .env -- vitest"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^1.2.18",
+    "@copilotkit/react-core": "^1.8.13",
+    "@copilotkit/react-ui": "^1.8.13",
+    "@copilotkit/runtime": "^1.8.13",
+    "@inngest/agent-kit": "^0.8.0",
+    "@langwatch/create-agent-app": "file:../create_agent_app",
+    "concurrently": "^9.1.2",
+    "inngest-cli": "^1.6.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0",
+    "tsx": "^4.19.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "@langwatch/scenario-ts": "^0.1.0",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "dotenv-cli": "^8.0.0",
+    "eslint": "^9.25.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.30.1",
+    "vitest": "^3.1.4"
+  }
+}
