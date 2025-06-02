@@ -64,15 +64,15 @@ In alphabetical order:
 
 ### <img src="./create_agent_app/priv/typescript.svg" alt="TypeScript" width="16" height="16"> TypeScript
 
-| Framework                                               | Customer Support Agent                                                                                                                    | Vibe Coding Agent |
-| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
-| [Ax](https://github.com/ax-llm/ax)                     | [Code](./ax_example/src/CustomerSupportAgent.ts) \| [Test](./ax_example/src/CustomerSupportAgent.test.ts)                                   |                   |
-| [Mastra](https://github.com/mastra-ai/mastra)           | [Code](./mastra_example/mastra/agents/customer-support-agent.ts) \| [Test](./mastra_example/mastra/agents/customer-support-agent.test.ts) |                   |
-| Pure JavaScript, zero dependencies (Cloudflare Workers) | [Code](./cloudflare_worker_example_no_dependencies/index.js)                                                                             |                   |
+| Framework                                                   | Customer Support Agent                                                                                                                    | Vibe Coding Agent |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| [Ax](https://github.com/ax-llm/ax)                          | [Code](./ax_example/src/customer-support-agent.ts) \| [Test](./ax_example/src/customer-support-agent.test.ts)                             |                   |
+| [LangGraph.js](https://github.com/langchain-ai/langgraphjs) | [Code](./langgraph_js_example/agents/customer-support-agent.ts) \| [Test](./langgraph_js_example/agents/customer-support-agent.test.ts)   |                   |
+| [Mastra](https://github.com/mastra-ai/mastra)               | [Code](./mastra_example/mastra/agents/customer-support-agent.ts) \| [Test](./mastra_example/mastra/agents/customer-support-agent.test.ts) |                   |
+| Pure JavaScript, zero dependencies (Cloudflare Workers)     | [Code](./cloudflare_worker_example_no_dependencies/index.js)                                                                              |                   |
 
 Coming up soon (help wanted!):
 
-- [ ] LangGraph.js
 - [ ] Inngest AgentKit
 - [ ] CrewAI
 - [ ] AutoGen

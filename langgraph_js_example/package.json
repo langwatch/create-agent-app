@@ -1,0 +1,50 @@
+{
+  "name": "langgraph-js-example",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:vite\" \"npm run dev:langgraph\"",
+    "dev:vite": "vite",
+    "build": "tsc -b && vite build",
+    "dev:langgraph": "npx @langchain/langgraph-cli dev --port 2024 --config ./langgraph.json",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "test": "VERBOSE=true dotenv -e .env -- vitest"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^1.2.18",
+    "@copilotkit/react-core": "^1.8.13",
+    "@copilotkit/react-ui": "^1.8.13",
+    "@copilotkit/runtime": "^1.8.13",
+    "@langchain/core": "^0.3.57",
+    "@langchain/google-genai": "^0.2.10",
+    "@langchain/langgraph": "^0.2.74",
+    "@langwatch/create-agent-app": "file:../create_agent_app",
+    "@tailwindcss/vite": "^4.1.8",
+    "concurrently": "^9.1.2",
+    "langchain": "^0.3.27",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0",
+    "tailwindcss": "^4.1.8",
+    "uuid": "^11.1.0",
+    "zod": "^3.25.48"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "@langwatch/scenario-ts": "^0.1.0",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react-swc": "^3.9.0",
+    "dotenv-cli": "^8.0.0",
+    "eslint": "^9.25.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^16.0.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.30.1",
+    "vite": "^6.3.5",
+    "vitest": "^3.1.4"
+  }
+}

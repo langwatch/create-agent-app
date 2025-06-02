@@ -14,10 +14,7 @@ import type {
 
 function App() {
   return (
-    <CopilotKit
-      runtimeUrl="http://localhost:4111/copilotkit"
-      agent="customerSupportAgent"
-    >
+    <CopilotKit runtimeUrl="/copilotkit" agent="customerSupportAgent">
       <CustomerSupportChat />
     </CopilotKit>
   );
@@ -342,7 +339,9 @@ const DocumentViewer = ({ document }: { document: DocumentResponse }) => {
           >
             <span>{isExpanded ? "Show less" : "Show more"}</span>
             <svg
-              className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
+              className={`w-4 h-4 transition-transform duration-200 ${
+                isExpanded ? "rotate-180" : ""
+              }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

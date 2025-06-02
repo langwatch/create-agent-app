@@ -1,6 +1,6 @@
 import { Scenario, TestableAgent, Verdict } from "@langwatch/scenario-ts";
 import { describe, expect, it } from "vitest";
-import { customerSupportAgent } from "./CustomerSupportAgent";
+import { customerSupportAgent } from "./customer-support-agent";
 
 describe("Customer Support Agent", () => {
   it("gets order status", async () => {

@@ -1,0 +1,10 @@
+{
+  "node_version": "20",
+  "dependencies": [
+    "."
+  ],
+  "graphs": {
+    "customerSupportAgent": "./agents/customer-support-agent.ts:agent"
+  },
+  "env": ".env"
+}

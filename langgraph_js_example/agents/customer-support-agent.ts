@@ -1,14 +1,13 @@
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { Agent } from "@mastra/core/agent";
-import { LibSQLStore } from "@mastra/libsql";
-import { Memory } from "@mastra/memory";
+import { createReactAgent } from "@langchain/langgraph/prebuilt";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
+import { tool } from "@langchain/core/tools";
 import {
+  httpGETCompanyPolicy,
   httpGETCustomerOrderHistory,
   httpGETOrderStatus,
-  httpGETCompanyPolicy,
   httpGETTroubleshootingGuide,
 } from "@langwatch/create-agent-app";
-import { createTool } from "@mastra/core";
+
 import { z } from "zod";
 
 const SYSTEM_PROMPT = `
@@ -23,6 +22,17 @@ Your core principles for interacting with users are:
 *   **Professionalism:** Maintain a courteous and professional tone throughout the conversation.
 *   **Empathy:** Acknowledge the customer's frustration and show understanding when appropriate.
 </Introduction>
+
+<Tools>
+You have access to the following tools:
+
+*   \`get_customer_order_history()\`: Retrieves a list of the past orders of the customer you are talking to. This is useful for understanding previous purchases and service subscriptions.
+*   \`get_order_status(order_id: str)\`: Retrieves the current status of a specific order, given its order ID. Use this to track shipping, delivery, or activation progress.
+*   \`get_company_policy()\`: Retrieves the XPTO Telecom's full customer service policy and terms of service. Refer to this for details on billing, contracts, refunds, service agreements, and company regulations.
+*   \`get_troubleshooting_guide(guide: Literal["internet", "mobile", "television", "ecommerce"])\`:  Retrieves troubleshooting guides for specific service areas (internet, mobile, television, e-commerce). Use these guides to assist customers in resolving technical issues.
+*   \`escalate_to_human()\`: Escalates the customer to a human support agent and provides a link for opening a support ticket. Use this if you are unable to resolve the customer's issue, or if the customer requests human assistance. Pass a brief summary of the interaction so far in the message argument.
+
+</Tools>
 
 <Workflow>
 Follow these steps to effectively assist customers:
@@ -71,103 +81,84 @@ Today is 2025-04-19
 </Info>
 `;
 
-export const getCustomerOrderHistory = createTool({
-  id: "get-customer-order-history",
-  description: "Get the current customer order history",
-  inputSchema: z.object({}),
-  outputSchema: z.array(
-    z.object({
-      orderId: z.string(),
-      items: z.array(z.string()),
-      totalAmount: z.number(),
-      orderDate: z.string(),
-    })
-  ),
-  execute: async () => {
-    return await httpGETCustomerOrderHistory();
+const getCustomerOrderHistoryTool = tool(
+  async () => {
+    return JSON.stringify(await httpGETCustomerOrderHistory());
   },
-});
+  {
+    name: "getCustomerOrderHistory",
+    description: "Get the current customer order history",
+    schema: z.object({}),
+  }
+);
 
-export const getOrderStatus = createTool({
-  id: "get-order-status",
-  description: "Get the status of a specific order",
-  inputSchema: z.object({
-    orderId: z.string().describe("The ID of the order to get the status of"),
-  }),
-  outputSchema: z.object({
-    orderId: z.string(),
-    status: z.enum(["pending", "shipped", "delivered", "cancelled"]),
-  }),
-  execute: async ({ context }) => {
-    return await httpGETOrderStatus(context.orderId);
+const getOrderStatusTool = tool(
+  async ({ orderId }) => {
+    return JSON.stringify(await httpGETOrderStatus(orderId));
   },
-});
+  {
+    name: "getOrderStatus",
+    description: "Get the status of a specific order",
+    schema: z.object({
+      orderId: z.string().describe("The ID of the order to get the status of"),
+    }),
+  }
+);
 
-export const getCompanyPolicy = createTool({
-  id: "get-company-policy",
-  description: "Get the company policy document",
-  inputSchema: z.object({}),
-  outputSchema: z.object({
-    documentId: z.string(),
-    documentName: z.string(),
-    documentContent: z.string(),
-  }),
-  execute: async () => {
-    return await httpGETCompanyPolicy();
+const getCompanyPolicyTool = tool(
+  async () => {
+    return JSON.stringify(await httpGETCompanyPolicy());
   },
-});
+  {
+    name: "getCompanyPolicy",
+    description: "Get the company policy document",
+    schema: z.object({}),
+  }
+);
 
-export const getTroubleshootingGuide = createTool({
-  id: "get-troubleshooting-guide",
-  description: "Get the troubleshooting guide for a specific topic",
-  inputSchema: z.object({
-    guide: z
-      .enum(["internet", "mobile", "television", "ecommerce"])
-      .describe("The guide to get the troubleshooting guide for"),
-  }),
-  outputSchema: z.object({
-    documentId: z.string(),
-    documentName: z.string(),
-    documentContent: z.string(),
-  }),
-  execute: async ({ context }) => {
-    return await httpGETTroubleshootingGuide(context.guide);
+const getTroubleshootingGuideTool = tool(
+  async ({ guide }) => {
+    return JSON.stringify(await httpGETTroubleshootingGuide(guide));
   },
-});
+  {
+    name: "getTroubleshootingGuide",
+    description: "Get the troubleshooting guide for a specific topic",
+    schema: z.object({
+      guide: z
+        .enum(["internet", "mobile", "television", "ecommerce"])
+        .describe("The guide to get the troubleshooting guide for"),
+    }),
+  }
+);
 
-export const escalateToHuman = createTool({
-  id: "escalate-to-human",
-  description:
-    "Escalate to human support, retrieves a link for the customer to open a ticket",
-  inputSchema: z.object({}),
-  outputSchema: z.object({
-    url: z.string(),
-    type: z.literal("escalation"),
-  }),
-  execute: async () => {
-    return {
+const escalateToHumanTool = tool(
+  async () => {
+    return JSON.stringify({
       url: "https://support.xpto.com/tickets",
       type: "escalation" as const,
-    };
+    });
   },
+  {
+    name: "escalateToHuman",
+    description:
+      "Escalate to human support, retrieves a link for the customer to open a ticket",
+    schema: z.object({}),
+  }
+);
+
+const model = new ChatGoogleGenerativeAI({
+  model: "gemini-2.5-flash-preview-04-17",
+  apiKey: process.env.GEMINI_API_KEY!,
 });
 
-export const customerSupportAgent = new Agent({
-  name: "Customer Support Agent",
-  instructions: SYSTEM_PROMPT,
-  model: createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY }).chat(
-    "gemini-2.5-flash-preview-04-17"
-  ),
-  tools: {
-    getCustomerOrderHistory,
-    getOrderStatus,
-    getCompanyPolicy,
-    getTroubleshootingGuide,
-    escalateToHuman,
-  },
-  memory: new Memory({
-    storage: new LibSQLStore({
-      url: "file:../mastra.db", // path is relative to the .mastra/output directory
-    }),
-  }),
+export const agent = createReactAgent({
+  llm: model,
+  prompt: SYSTEM_PROMPT,
+  tools: [
+    getCustomerOrderHistoryTool,
+    getOrderStatusTool,
+    getCompanyPolicyTool,
+    getTroubleshootingGuideTool,
+    escalateToHumanTool,
+  ],
 });
