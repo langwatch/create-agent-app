@@ -1,10 +1,11 @@
 import json
 import os
 import random
-from typing import Any, Literal
 import dotenv
+from typing import Any, Literal
 
-dotenv.load_dotenv()
+import langwatch
+from openinference.instrumentation.agno import AgnoInstrumentor
 
 from create_agent_app.common.customer_support.mocked_apis import (
     http_GET_company_policy,
@@ -15,6 +16,12 @@ from create_agent_app.common.customer_support.mocked_apis import (
 from agno.agent import Agent
 from agno.models.google import Gemini
 from agno.models.openai import OpenAIChat
+
+dotenv.load_dotenv()
+
+langwatch.setup(
+    instrumentors=[AgnoInstrumentor()],
+)
 
 SYSTEM_PROMPT = """
 <Introduction>
