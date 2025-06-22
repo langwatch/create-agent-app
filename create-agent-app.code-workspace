@@ -4,6 +4,12 @@
       "path": "."
     },
     {
+      "path": "agno_example"
+    },
+    {
+      "path": "ax_example"
+    },
+    {
       "path": "dspy_example"
     },
     {
@@ -13,19 +19,25 @@
       "path": "google_adk_example"
     },
     {
+      "path": "inngest_agent_kit_example"
+    },
+    {
       "path": "langgraph_functional_api_example"
     },
     {
       "path": "langgraph_highlevel_api_example"
     },
     {
+      "path": "langgraph_js_example"
+    },
+    {
+      "path": "mastra_example"
+    },
+    {
       "path": "pydantic_ai_example"
     },
     {
       "path": "smolagents_example"
-    },
-    {
-      "path": "agno_example"
     },
     {
       "path": "no_framework_example"

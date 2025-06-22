@@ -1,8 +1,7 @@
 import json
 import os
-import random
 import dotenv
-from typing import Any, Literal
+from typing import Literal
 
 import langwatch
 from openinference.instrumentation.agno import AgnoInstrumentor
@@ -14,7 +13,6 @@ from create_agent_app.common.customer_support.mocked_apis import (
     http_GET_troubleshooting_guide,
 )
 from agno.agent import Agent
-from agno.models.google import Gemini
 from agno.models.openai import OpenAIChat
 
 dotenv.load_dotenv()
@@ -148,9 +146,9 @@ def escalate_to_human() -> str:
 
 
 agent = Agent(
-    model=Gemini(
-        id="gemini-2.5-flash-preview-04-17",
-        api_key=os.getenv("GEMINI_API_KEY"),
+    model=OpenAIChat(
+        id="gpt-4.1-mini",
+        api_key=os.getenv("OPENAI_API_KEY"),
     ),
     tools=[
         get_customer_order_history,
@@ -162,37 +160,3 @@ agent = Agent(
     description=SYSTEM_PROMPT,
     add_history_to_messages=True,
 )
-
-
-def call_agent(message: str, context: dict[str, Any]) -> dict[str, Any]:
-    thread_id = str(context["thread_id"])
-
-    current_messages_count = len(
-        agent.get_messages_for_session(thread_id) or ["initial"]
-    )
-
-    result = agent.run(message, session_id=thread_id)
-
-    new_messages = (result.messages or [])[current_messages_count + 1 :]
-
-    openai_formatted_messages = [
-        OpenAIChat()._format_message(message) for message in new_messages
-    ]
-    # Fixes for openai formatting
-    rand = random.randint(0, 100)
-    for message_ in openai_formatted_messages:
-        if message_["role"] == "assistant" and message_.get("tool_calls") is not None:
-            for tool_call in message_["tool_calls"]:
-                tool_call["id"] = f"tool_call_{tool_call['function']['name']}_{rand}"
-        if message_["role"] == "tool":
-            tool_calls = message_.get("tool_calls", [])
-            tool_name = tool_calls[0]["tool_name"] if len(tool_calls) > 0 else None
-            if not message_.get("tool_call_id") and tool_name:
-                message_["tool_call_id"] = f"tool_call_{tool_name}_{rand}"
-            if type(message_.get("content")) == list:
-                message_["content"] = message_["content"][0]
-            del message_["tool_calls"]
-
-    return {
-        "messages": openai_formatted_messages,
-    }
