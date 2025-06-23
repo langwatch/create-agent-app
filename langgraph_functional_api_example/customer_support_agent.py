@@ -5,7 +5,7 @@
 
 import json
 import os
-from typing import Any, List, Literal, Optional, cast
+from typing import List, Literal, Optional, cast
 import dotenv
 
 dotenv.load_dotenv()
@@ -20,9 +20,8 @@ from create_agent_app.common.customer_support.mocked_apis import (
     http_GET_troubleshooting_guide,
 )
 from langchain.chat_models import init_chat_model
-from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.messages import SystemMessage
 from langgraph.checkpoint.memory import InMemorySaver
-from langchain_core.messages import convert_to_openai_messages
 from langgraph.graph.message import Messages, add_messages
 from langchain_core.messages import BaseMessage, ToolMessage, AIMessage
 from langgraph.func import entrypoint, task
@@ -30,9 +29,9 @@ from langchain_core.tools import tool
 
 
 model = init_chat_model(
-    "google_genai:gemini-2.5-flash-preview-04-17",
+    "openai:gpt-4.1-mini",
     temperature=0,
-    api_key=os.getenv("GEMINI_API_KEY"),
+    api_key=os.getenv("OPENAI_API_KEY"),
 )
 
 
@@ -218,25 +217,3 @@ def agent(messages: Messages, previous: Optional[Messages] = None):
     messages = add_messages(messages, llm_response)
     new_messages += [llm_response]
     return entrypoint.final(value=new_messages, save=messages)
-
-
-def call_agent(message: str, context: dict[str, Any]) -> dict[str, Any]:
-    result: List[BaseMessage] = []
-    for step in agent.stream(
-        [
-            HumanMessage(content=message),
-        ],
-        {
-            "configurable": {
-                "thread_id": context["thread_id"],
-            }
-        },
-    ):
-        for task_name, task_result in step.items():
-            if task_name == "agent":
-                # Capture final response
-                result = task_result
-
-    return {
-        "messages": convert_to_openai_messages(result),
-    }

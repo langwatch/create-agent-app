@@ -7,9 +7,9 @@ requires-python = ">=3.13"
 dependencies = [
     "create-agent-app",
     "langchain>=0.3.23",
-    "langchain-google-genai>=2.1.3",
+    "langchain-openai>=0.3.24",
     "langgraph>=0.3.31",
-    "langwatch-scenario>=0.1.3",
+    "langwatch-scenario>=0.7.2",
     "pytest>=8.3.5",
     "python-dotenv>=1.1.0",
 ]
