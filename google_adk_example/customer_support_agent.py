@@ -1,5 +1,5 @@
 import os
-from typing import Any, List, Literal
+from typing import List, Literal
 import dotenv
 
 dotenv.load_dotenv()
@@ -13,11 +13,8 @@ from create_agent_app.common.customer_support.mocked_apis import (
     http_GET_order_status,
     http_GET_troubleshooting_guide,
 )
-from google.adk.agents import Agent, LlmAgent
-from google.adk.sessions import InMemorySessionService, Session
-from google.adk.runners import Runner
-from google.genai.types import Content, Part
-import google.adk.models.lite_llm as litellm
+from google.adk.agents import Agent
+from google.adk.models.lite_llm import LiteLlm
 
 
 SYSTEM_PROMPT = """
@@ -146,7 +143,7 @@ os.environ["GOOGLE_API_KEY"] = os.getenv("GEMINI_API_KEY", "")
 
 agent = Agent(
     name="customer_support_agent",
-    model="gemini-2.5-flash-preview-04-17",
+    model=LiteLlm(model="openai/gpt-4.1-mini"),
     description="Customer support agent for XPTO Telecom",
     instruction=SYSTEM_PROMPT,
     tools=[
@@ -157,37 +154,3 @@ agent = Agent(
         escalate_to_human,
     ],
 )
-
-
-session_service = InMemorySessionService()
-
-runner = Runner(
-    agent=agent,
-    app_name="customer_support_agent",
-    session_service=session_service,
-)
-
-
-async def call_agent(message: str, context: dict[str, Any]) -> dict[str, Any]:
-    thread_id = str(context["thread_id"])
-    session = session_service.get_session(
-        app_name="customer_support_agent", user_id="user_1", session_id=thread_id
-    )
-    if not session:
-        session = session_service.create_session(
-            app_name="customer_support_agent", user_id="user_1", session_id=thread_id
-        )
-
-    user_message = Content(role="user", parts=[Part(text=message)])
-    contents: List[Content] = []
-    async for event in runner.run_async(
-        user_id="user_1", session_id=thread_id, new_message=user_message
-    ):
-        contents += [event.content] if event.content else []
-
-    messages_openai_format = [
-        litellm._content_to_message_param(content) for content in contents
-    ]
-    return {
-        "messages": messages_openai_format,
-    }
