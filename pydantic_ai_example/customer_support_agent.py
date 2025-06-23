@@ -2,7 +2,7 @@
 # - https://ai.pydantic.dev/agents
 # - https://ai.pydantic.dev/tools
 
-from typing import Any, List, Literal
+from typing import List, Literal
 import dotenv
 
 dotenv.load_dotenv()
@@ -17,13 +17,9 @@ from create_agent_app.common.customer_support.mocked_apis import (
     http_GET_troubleshooting_guide,
 )
 from pydantic_ai import Agent
-from pydantic_ai.messages import UserPromptPart, ModelMessage
-from pydantic_graph import End
-from pydantic_ai.models.openai import OpenAIModel
-from pydantic_ai.providers.openai import OpenAIProvider
 
 agent = Agent(
-    "google-gla:gemini-2.5-flash-preview-04-17",
+    "openai:gpt-4.1-mini",
     system_prompt="""
 <Introduction>
 You are an AI customer service agent for XPTO Telecom, a telecommunications company providing internet, mobile, and television services, as well as selling mobile devices and related electronics. Your primary goal is to assist customers with their inquiries efficiently and effectively. You should always strive to provide helpful, accurate, and polite responses.
@@ -150,40 +146,3 @@ def escalate_to_human() -> dict[str, str]:
         "url": "https://support.xpto.com/tickets",
         "type": "escalation",
     }
-
-
-# In-Memory History
-# Pydantic AI does not have a built-in memory mechanism yet: https://github.com/pydantic/pydantic-ai/issues/530
-history: dict[str, List[ModelMessage]] = {}
-
-
-async def call_agent(message: str, context: dict[str, Any]) -> dict[str, Any]:
-    thread_id = context["thread_id"]
-    if thread_id not in history:
-        history[thread_id] = []
-
-    async with agent.iter(
-        message,
-        message_history=history[thread_id],
-    ) as agent_run:
-        next_node = agent_run.next_node  # start with the first node
-        nodes = [next_node]
-        while not isinstance(next_node, End):
-            next_node = await agent_run.next(next_node)
-            nodes.append(next_node)
-
-        if not agent_run.result:
-            raise Exception("No result from agent")
-
-        new_messages = agent_run.result.new_messages()
-        for message_ in new_messages:
-            for part in message_.parts:
-                if isinstance(part, UserPromptPart) and part.content == message:
-                    part.content = message
-
-        history[thread_id] += new_messages
-
-        new_messages_openai_format = await OpenAIModel(
-            "any", provider=OpenAIProvider(api_key="bogus")
-        )._map_messages(new_messages)
-        return {"messages": new_messages_openai_format}

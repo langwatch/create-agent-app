@@ -1,5 +1,4 @@
 import os
-from typing import Any
 from pydantic_ai import Agent
 from pydantic_ai.messages import ModelMessage, UserPromptPart
 from pydantic_graph import End
@@ -14,7 +13,7 @@ from create_agent_app.common.vibe_coding.utils import (
 class VibeCodingAgent:
     def __init__(self, template_path: str):
         agent = Agent(
-            "google-gla:gemini-2.5-flash-preview-04-17",
+            "openai:gpt-4.1-mini",
             system_prompt=f"""
         You are a coding assistant specialized in building whole new websites from scratch.
 
@@ -102,7 +101,7 @@ class VibeCodingAgent:
         self.history: list[ModelMessage] = []
         self.template_path = template_path
 
-    async def call_agent(self, message: str, context: dict[str, Any]):
+    async def call(self, message: str):
         tree = generate_directory_tree(self.template_path)
 
         user_prompt = f"""{message}
@@ -132,8 +131,4 @@ class VibeCodingAgent:
 
             self.history += new_messages
 
-            new_messages_openai_format = await OpenAIModel(
-                "any", provider=OpenAIProvider(api_key="bogus")
-            )._map_messages(new_messages)
-
-        return {"messages": new_messages_openai_format}
+        return new_messages
