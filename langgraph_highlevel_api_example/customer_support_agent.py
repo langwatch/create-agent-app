@@ -1,5 +1,5 @@
 import os
-from typing import Any, List, Literal
+from typing import List, Literal
 import dotenv
 
 dotenv.load_dotenv()
@@ -14,16 +14,14 @@ from create_agent_app.common.customer_support.mocked_apis import (
     http_GET_troubleshooting_guide,
 )
 from langchain.chat_models import init_chat_model
-from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import InMemorySaver
-from langchain_core.messages import convert_to_openai_messages
 
 
 llm = init_chat_model(
-    "google_genai:gemini-2.5-flash-preview-04-17",
+    "openai:gpt-4.1-mini",
     temperature=0,
-    api_key=os.getenv("GEMINI_API_KEY"),
+    api_key=os.getenv("OPENAI_API_KEY"),
 )
 
 
@@ -153,6 +151,7 @@ checkpointer = InMemorySaver()
 
 agent = create_react_agent(
     model=llm,
+    prompt=SYSTEM_PROMPT,
     tools=[
         get_customer_order_history,
         get_order_status,
@@ -162,26 +161,3 @@ agent = create_react_agent(
     ],
     checkpointer=checkpointer,
 )
-
-
-def call_agent(message: str, context: dict[str, Any]) -> dict[str, Any]:
-    response = []
-    for task in agent.stream(
-        {
-            "messages": [
-                SystemMessage(content=SYSTEM_PROMPT),
-                HumanMessage(content=message),
-            ]
-        },
-        {
-            "configurable": {
-                "thread_id": context["thread_id"],
-            }
-        },
-    ):
-        for _, task_result in task.items():
-            response += task_result["messages"]
-
-    return {
-        "messages": convert_to_openai_messages(response),
-    }
