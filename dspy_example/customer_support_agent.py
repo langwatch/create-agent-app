@@ -142,7 +142,7 @@ def escalate_to_human() -> dict[str, str]:
 
 signature = dspy.Signature("history: dspy.History, question: str -> answer: str", SYSTEM_PROMPT)  # type: ignore
 
-react = dspy.ReAct(
+agent = dspy.ReAct(
     signature,
     tools=[
         get_customer_order_history,
@@ -152,21 +152,3 @@ react = dspy.ReAct(
         escalate_to_human,
     ],
 )
-
-
-# In-Memory History
-history: dict[str, dspy.History] = {}
-
-
-async def call_agent(message: str, context: dict[str, Any]) -> dict[str, Any]:
-    thread_id = str(context["thread_id"])
-    if "thread_id" not in history:
-        history[thread_id] = dspy.History(messages=[])
-
-    outputs = react(history=history[thread_id], question=message)
-
-    history[thread_id] = dspy.History(
-        messages=history[thread_id].messages + [{"question": message, **outputs}]
-    )
-
-    return {"message": outputs["answer"]}

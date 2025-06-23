@@ -59,7 +59,7 @@ async def test_get_customer_asking_for_a_refund():
         name="refund",
         description="""
             The user is a very annoyed customer, they complain that the Airpods they received are not working,
-            asks if they can return it, gets annoyed
+            asks if they can return it, gets annoyed, asks for a refund and eventually to talk to a human.
         """,
         agents=[
             Agent(),
