@@ -2,30 +2,27 @@ import uuid
 import pytest
 import scenario
 from customer_support_crew import call_crew
-from typing import Dict, Any
 import dotenv
 
 dotenv.load_dotenv()
 
 scenario.configure(default_model="openai/gpt-4o-mini", cache_key="42")
 
+set_id = "create-agent-app:crewai"
+
 
 class Agent(scenario.AgentAdapter):
+    """
+    `Agent` is a class that extends `scenario.AgentAdapter` and implements the `call` method.
+    It is used to call the `call_crew` function and return the last message from the assistant.
+    """
+
     async def call(self, input: scenario.AgentInput) -> scenario.AgentReturnTypes:
         # Add the missing context parameter with thread_id
         context = {"thread_id": input.thread_id or str(uuid.uuid4())}
-        result = await call_crew(input.last_new_user_message_str(), context)
+        response_content = await call_crew(input.last_new_user_message_str(), context)
 
-        # Extract the assistant's response from the messages
-        # The last message should be the assistant's response
-        messages = result.get("messages", [])
-        if messages:
-            last_message = messages[-1]
-            if last_message.get("role") == "assistant":
-                return last_message.get("content", "")
-
-        # Fallback if no assistant message found
-        return "I apologize, but I encountered an issue processing your request."
+        return response_content
 
 
 @pytest.mark.agent_test
@@ -47,6 +44,7 @@ async def test_get_order_status():
                 ],
             ),
         ],
+        set_id=set_id,
     )
 
     assert result.success
@@ -73,6 +71,7 @@ async def test_get_customer_asking_for_a_refund():
                 ],
             ),
         ],
+        set_id=set_id,
     )
 
     assert result.success

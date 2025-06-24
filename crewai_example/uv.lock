@@ -430,7 +430,7 @@ dependencies = [
 requires-dist = [
     { name = "create-agent-app", editable = "../" },
     { name = "crewai", specifier = ">=0.70.0" },
-    { name = "langwatch-scenario", specifier = ">=0.7.2" },
+    { name = "langwatch-scenario", specifier = ">=0.7.3" },
     { name = "pytest", specifier = ">=8.3.5" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
 ]
@@ -1019,7 +1019,7 @@ wheels = [
 
 [[package]]
 name = "langwatch-scenario"
-version = "0.7.2"
+version = "0.7.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
@@ -1037,9 +1037,9 @@ dependencies = [
     { name = "termcolor" },
     { name = "wrapt" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/89/21/ac9c59b05f9861e1c1d56bb0388b2321ebeb0c1842891260564c12ab0735/langwatch_scenario-0.7.2.tar.gz", hash = "sha256:8fc76a5c61f54ddefc005e40034cef8a878237de1fbe0287a4372d354c2eca93", size = 107577, upload-time = "2025-06-23T14:03:28.9Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0d/61/fb9c65a35e280dfc3587ca973e0f2ddca1f95762350e29599788d8c04192/langwatch_scenario-0.7.3.tar.gz", hash = "sha256:9cd6392c6d35621172b33cba23cb9f9bc8545c55e2eb57ec83f146c314f49056", size = 108046, upload-time = "2025-06-23T17:00:06.766Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/16/32/387c5d289dcb7d3c6faaa5b830381aa11bedb2556590d856127cf6588a09/langwatch_scenario-0.7.2-py3-none-any.whl", hash = "sha256:ac153fa4e9142bc5b9df957ea2ad1d2f859eb9eb9c9867fa18b928fd9b52e07e", size = 270224, upload-time = "2025-06-23T14:03:27.363Z" },
+    { url = "https://files.pythonhosted.org/packages/b7/a2/7533f9e94d7470291b0d6f999cce9c3e06dc4ba4140fd9832f8659fb15a8/langwatch_scenario-0.7.3-py3-none-any.whl", hash = "sha256:c386d4f42631765a9b18a6171795a636b9e6afa7599e1447a365cff1d18049c0", size = 270758, upload-time = "2025-06-23T17:00:05.332Z" },
 ]
 
 [[package]]

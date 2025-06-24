@@ -6,9 +6,6 @@ from crewai import Agent, Crew, Task
 from crewai.tools import BaseTool
 from pydantic import BaseModel, Field
 from create_agent_app.common.customer_support.mocked_apis import (
-    DocumentResponse,
-    OrderSummaryResponse,
-    OrderStatusResponse,
     http_GET_company_policy,
     http_GET_customer_order_history,
     http_GET_order_status,
@@ -152,7 +149,7 @@ class EscalateToHumanTool(BaseTool):
         )
 
 
-def create_customer_support_crew() -> Crew:
+def create_customer_support_agent() -> Agent:
     # Create tool instances
     get_customer_order_history_tool = GetCustomerOrderHistoryTool()
     get_order_status_tool = GetOrderStatusTool()
@@ -160,13 +157,11 @@ def create_customer_support_crew() -> Crew:
     get_troubleshooting_guide_tool = GetTroubleshootingGuideTool()
     escalate_to_human_tool = EscalateToHumanTool()
 
-    # Single agent matching the Agno version approach
+    # Minimal agent configuration - role and goal are required
     customer_support_agent = Agent(
-        role="Customer Support Agent",
-        goal="Provide excellent customer service and resolve customer issues efficiently",
-        backstory=SYSTEM_PROMPT,
-        verbose=True,
-        allow_delegation=False,
+        role="Customer Support",  # Minimal role
+        goal="Help customers",  # Minimal goal
+        backstory=SYSTEM_PROMPT,  # All the real instructions
         tools=[
             get_customer_order_history_tool,
             get_order_status_tool,
@@ -176,33 +171,32 @@ def create_customer_support_crew() -> Crew:
         ],
     )
 
-    return customer_support_agent  # Return just the agent, not a crew
+    return customer_support_agent
 
 
 # Create the agent instance
-customer_support_agent = create_customer_support_crew()
+customer_support_agent = create_customer_support_agent()
 
 
-async def call_crew(message: str, context: Dict[str, Any]) -> Dict[str, Any]:
+async def call_crew(message: str, context: Dict[str, Any]) -> str:
     thread_id = context.get("thread_id", "default")
     if thread_id not in conversation_history:
         conversation_history[thread_id] = []
 
     conversation_history[thread_id].append({"role": "user", "content": message})
 
-    # Create a task for this specific customer message
+    # Create a task for this specific customer message - Required for CrewAI
     customer_support_task = Task(
-        description=f"Handle the customer inquiry: '{message}'. Follow the workflow and guidelines provided in your backstory. Provide a helpful and professional response.",
+        description=message,  # Just the message
         agent=customer_support_agent,
-        expected_output="Comprehensive response to the customer inquiry",
+        expected_output="Response to customer inquiry",  # Minimal but required
     )
 
     # Create a crew with the agent and task
     crew = Crew(
-        agents=[customer_support_agent],
+        agents=[customer_support_agent],  # only one agent, but could be more
         tasks=[customer_support_task],
         verbose=False,  # Set to False to reduce noise in tests
-        process="sequential",
     )
 
     # Kickoff the crew
@@ -216,7 +210,4 @@ async def call_crew(message: str, context: Dict[str, Any]) -> Dict[str, Any]:
     else:
         response_content = str(result)
 
-    conversation_history[thread_id].append(
-        {"role": "assistant", "content": response_content}
-    )
-    return {"messages": conversation_history[thread_id]}
+    return response_content
