@@ -3,7 +3,6 @@ import pytest
 from vibe_coding_agent import VibeCodingAgent
 import scenario
 from create_agent_app.common.vibe_coding.utils import clone_template
-from pydantic_graph import End
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.openai import OpenAIProvider
 
