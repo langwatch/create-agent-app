@@ -2,7 +2,7 @@ import { openai } from "@ai-sdk/openai";
 import scenario, { type AgentAdapter, AgentRole } from "@langwatch/scenario";
 import { describe, it, expect } from "vitest";
 
-import { customerSupportAgent as customerSupportAgentMastra } from "../customer-support-agent";
+import { customerSupportAgent as customerSupportAgentMastra } from "../agents/customer-support-agent";
 
 const customerSupportAgent: AgentAdapter = {
   role: AgentRole.AGENT,
