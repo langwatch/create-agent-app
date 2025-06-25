@@ -1,6 +1,6 @@
 import scenario, { type AgentAdapter, AgentRole } from "@langwatch/scenario";
 import { describe, expect, it } from "vitest";
-import { customerSupportAgent } from "../customer-support-agent";
+import { customerSupportAgent } from "../agents/customer-support-agent";
 import { openai } from "@ai-sdk/openai";
 
 describe("Customer Support Agent", () => {
