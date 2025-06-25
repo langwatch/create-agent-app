@@ -3,15 +3,15 @@ import { describe, expect, it } from "vitest";
 import { customerSupportAgent } from "../agents/customer-support-agent";
 import { openai } from "@ai-sdk/openai";
 
-describe("Customer Support Agent", () => {
-  const agent: AgentAdapter = {
-    role: AgentRole.AGENT,
-    call: async (input) => {
-      const result = await customerSupportAgent.generate(input.messages);
-      return result.text;
-    },
-  };
+const agent: AgentAdapter = {
+  role: AgentRole.AGENT,
+  call: async (input) => {
+    const result = await customerSupportAgent.generate(input.messages);
+    return result.text;
+  },
+};
 
+describe("Customer Support Agent", () => {
   it("replies customer asking for a refund", async () => {
     const result = await scenario.run({
       name: "Customer Support Agent",
