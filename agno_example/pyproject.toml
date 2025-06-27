@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "agno>=1.6.3",
+    "agno>=1.6.4",
     "create-agent-app",
     "langwatch>=0.2.4",
     "langwatch-scenario>=0.7.1",
