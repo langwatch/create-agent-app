@@ -1,0 +1,18 @@
+[project]
+name = "pixelagent-example"
+version = "0.1.0"
+description = "Pixeltable agent example"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "create-agent-app",
+    "pixelagent",
+    "pixeltable",
+    "openai",
+    "langwatch-scenario>=0.1.3",
+    "pytest>=8.3.5",
+    "python-dotenv>=1.1.0",
+]
+
+[tool.uv.sources]
+create-agent-app = { path = "../", editable = true }
