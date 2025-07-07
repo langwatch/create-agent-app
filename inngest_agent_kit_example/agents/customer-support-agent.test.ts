@@ -2,23 +2,33 @@ import scenario, { type AgentAdapter, AgentRole } from "@langwatch/scenario";
 import { describe, expect, it } from "vitest";
 import { customerSupportAgent } from "./customer-support-agent";
 import { openai } from "@ai-sdk/openai";
+import { createState, Message } from "@inngest/agent-kit";
 
-const agent: AgentAdapter = {
-  role: AgentRole.AGENT,
-  call: async (input) => {
-    const prompt = input.messages
-      .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
-      .join("\n");
+const createAgent = (): AgentAdapter => {
+  const agentState = createState();
 
-    const result = await customerSupportAgent.run(prompt);
-    const lastMessage = result.output.at(-1);
+  return {
+    role: AgentRole.AGENT,
+    call: async (input) => {
+      const latestMessage = input.messages.at(-1)?.content || "";
+      const messageContent = typeof latestMessage === "string" ? latestMessage : JSON.stringify(latestMessage);
 
-    if (lastMessage?.type === "text") {
-      return lastMessage.content.toString();
-    }
-
-    return JSON.stringify(lastMessage);
-  },
+      let lastMessage: Message | undefined;
+      while (!lastMessage || lastMessage?.type === "tool_call") {
+        const result = await customerSupportAgent.run(messageContent, {
+          state: agentState,
+        });
+        agentState.appendResult(result);
+        lastMessage = result.output.at(-1);
+      }
+  
+      if (lastMessage?.type === "text") {
+        return lastMessage.content as string;
+      }
+      
+      return JSON.stringify(lastMessage);
+    },
+  };
 };
 
 describe("Customer Support Agent", () => {
@@ -28,7 +38,7 @@ describe("Customer Support Agent", () => {
       setId: "customer-support-agent",
       description: "User asks about the status of their last order",
       agents: [
-        agent,
+        createAgent(),
         scenario.userSimulatorAgent({
           model: openai("gpt-4.1"),
         }),
@@ -53,7 +63,7 @@ describe("Customer Support Agent", () => {
       description:
         "User complains that the Airpods they received are not working, asks if they can return it, gets annoyed, asks for a refund",
       agents: [
-        agent,
+        createAgent(),
         scenario.userSimulatorAgent({
           model: openai("gpt-4.1"),
         }),
