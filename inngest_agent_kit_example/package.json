@@ -17,6 +17,7 @@
     "@copilotkit/runtime": "^1.8.13",
     "@inngest/agent-kit": "^0.8.0",
     "@langwatch/create-agent-app": "file:../create_agent_app",
+    "@langwatch/scenario": "^0.2.6",
     "concurrently": "^9.1.2",
     "inngest-cli": "^1.6.3",
     "react": "^19.1.0",
