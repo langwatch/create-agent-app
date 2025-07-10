@@ -8,7 +8,6 @@ import { registerCopilotKit } from "@mastra/agui";
 export const mastra = new Mastra({
   agents: { customerSupportAgent },
   storage: new LibSQLStore({
-    // stores telemetry, evals, ... into memory storage, if it needs to persist, change to file:../mastra.db
     url: ":memory:",
   }),
   logger: new PinoLogger({
@@ -16,7 +15,6 @@ export const mastra = new Mastra({
     level: "info",
   }),
   server: {
-    // We will be calling this from a Vite App. Allow CORS
     cors: {
       origin: "*",
       allowMethods: ["*"],
@@ -29,4 +27,18 @@ export const mastra = new Mastra({
       }),
     ],
   },
+  telemetry: {
+    serviceName: "customer-support-agent",
+    enabled: true,
+    sampling: {
+      type: "always_on",
+    },
+    export: {
+      type: "otlp",
+      endpoint: "https://app.langwatch.ai/api/otel/v1/traces",
+      headers: {
+        "Authorization": `Bearer ${process.env.LANGWATCH_API_KEY}`,
+      },
+    }
+  }
 });
