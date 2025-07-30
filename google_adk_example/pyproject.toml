@@ -6,10 +6,8 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "create-agent-app",
-    "google-adk>=0.2.0",
-    "langwatch>=0.2.9",
-    "langwatch-scenario>=0.1.3",
-    "openinference-instrumentation-google-adk>=0.1.1",
+    "google-adk>=0.2.0",  
+    "langwatch-scenario>=0.1.3",  
     "pytest>=8.3.5",
     "python-dotenv>=1.1.0",
 ]

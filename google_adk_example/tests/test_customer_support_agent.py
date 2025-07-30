@@ -10,10 +10,6 @@ from google.adk.runners import Runner
 from google.genai.types import Content, Part
 import google.adk.models.lite_llm as litellm
 
-from openinference.instrumentation.google_adk import GoogleADKInstrumentor
-
-langwatch.setup(instrumentors=[GoogleADKInstrumentor()])
-
 
 scenario.configure(
     default_model="openai/gpt-4.1-mini",
