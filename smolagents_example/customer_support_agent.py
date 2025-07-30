@@ -3,8 +3,7 @@
 # - https://langchain-ai.github.io/langgraph/how-tos/react-agent-from-scratch-functional
 # - https://langchain-ai.github.io/langgraph/agents/agents/#memory
 
-import os
-from typing import List, Literal
+from typing import Any, List, Literal
 import dotenv
 
 dotenv.load_dotenv()
@@ -18,13 +17,13 @@ from create_agent_app.common.customer_support.mocked_apis import (
     http_GET_order_status,
     http_GET_troubleshooting_guide,
 )
-from smolagents import tool, ToolCallingAgent, LiteLLMModel
+from smolagents import tool, ToolCallingAgent, LiteLLMModel, MultiStepAgent
 
-from openinference.instrumentation.smolagents import SmolagentsInstrumentor
 
-import langwatch
+model = LiteLLMModel(
+    model_id="gemini/gemini-2.5-flash-preview-04-17",
+)
 
-langwatch.setup(instrumentors=[SmolagentsInstrumentor()])
 
 SYSTEM_PROMPT = """
 <Introduction>
@@ -153,20 +152,38 @@ def escalate_to_human() -> dict[str, str]:
     }
 
 
-agent = ToolCallingAgent(
-    name="customer_support_agent",
-    model=LiteLLMModel(model_id="openai/gpt-4.1-mini"),
-    description="Customer support agent for XPTO Telecom",
-    tools=[
-        get_customer_order_history,
-        get_order_status,
-        get_company_policy,
-        get_troubleshooting_guide,
-        escalate_to_human,
-    ],
-    max_steps=10,
-    verbosity_level=1,
-)
+# In-Memory History
+history: dict[str, MultiStepAgent] = {}
 
-# Set the system prompt
-agent.prompt_templates["system_prompt"] = SYSTEM_PROMPT
+
+def call_agent(message: str, context: dict[str, Any]) -> dict[str, Any]:
+    thread_id = str(context["thread_id"])
+
+    if thread_id not in history:
+        agent = ToolCallingAgent(
+            tools=[
+                get_customer_order_history,
+                get_order_status,
+                get_company_policy,
+                get_troubleshooting_guide,
+                escalate_to_human,
+            ],
+            model=model,
+            max_steps=10,
+            name="customer_support_agent",
+            description="Customer support agent for XPTO Telecom",
+            verbosity_level=1,
+        )
+
+        agent.prompt_templates["system_prompt"] = (
+            SYSTEM_PROMPT + "\n\n" + agent.prompt_templates["system_prompt"]
+        )
+    else:
+        agent = history[thread_id]
+
+    result = agent.run(message, reset=False)
+    history[thread_id] = agent
+
+    return {
+        "message": str(result),
+    }
