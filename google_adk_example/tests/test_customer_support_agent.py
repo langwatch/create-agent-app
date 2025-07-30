@@ -1,7 +1,6 @@
 from typing import List
 import pytest
 
-
 import scenario
 from customer_support_agent import agent
 from google.adk.sessions import InMemorySessionService
