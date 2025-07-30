@@ -2,18 +2,11 @@ from typing import List
 import pytest
 import langwatch
 
-
 import scenario
 from customer_support_agent import agent
-from google.adk.sessions import InMemorySessionService
-from google.adk.runners import Runner
-from google.genai.types import Content, Part
-import google.adk.models.lite_llm as litellm
+from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
 
-from openinference.instrumentation.google_adk import GoogleADKInstrumentor
-
-langwatch.setup(instrumentors=[GoogleADKInstrumentor()])
-
+langwatch.setup(instrumentors=[LlamaIndexInstrumentor()])
 
 scenario.configure(
     default_model="openai/gpt-4.1-mini",
@@ -21,42 +14,17 @@ scenario.configure(
 )
 
 
-class Agent(scenario.AgentAdapter):
+class AgentAdapter(scenario.AgentAdapter):
     def __init__(self):
-        self.session_service = InMemorySessionService()
-
-        self.runner = Runner(
-            agent=agent,
-            app_name="customer_support_agent",
-            session_service=self.session_service,
-        )
+        self.agent = agent
 
     async def call(self, input: scenario.AgentInput) -> scenario.AgentReturnTypes:
-        session = await self.session_service.get_session(
-            app_name="customer_support_agent",
-            user_id="user_1",
-            session_id=input.thread_id,
-        )
-        if not session:
-            session = await self.session_service.create_session(
-                app_name="customer_support_agent",
-                user_id="user_1",
-                session_id=input.thread_id,
-            )
+        # Run the agent with the user message
+        response = await self.agent.run(input.last_new_user_message_str())
 
-        user_message = Content(
-            role="user", parts=[Part(text=input.last_new_user_message_str())]
-        )
-        contents: List[Content] = []
-        async for event in self.runner.run_async(
-            user_id="user_1", session_id=input.thread_id, new_message=user_message
-        ):
-            contents += [event.content] if event.content else []
-
-        messages_openai_format = [
-            litellm._content_to_message_param(content) for content in contents
-        ]
-        return messages_openai_format  # type: ignore
+        # Convert the response to the expected format
+        # LlamaIndex returns a response object, so we extract the message content
+        return [{"role": "assistant", "content": str(response)}]
 
 
 @pytest.mark.agent_test
@@ -68,7 +36,7 @@ async def test_get_order_status():
             User asks about the status of their last order.
         """,
         agents=[
-            Agent(),
+            AgentAdapter(),
             scenario.UserSimulatorAgent(),
             scenario.JudgeAgent(
                 criteria=[
@@ -93,7 +61,7 @@ async def test_get_customer_asking_for_a_refund():
             asks if they can return it, gets annoyed, asks for a refund and eventually to talk to a human.
         """,
         agents=[
-            Agent(),
+            AgentAdapter(),
             scenario.UserSimulatorAgent(),
             scenario.JudgeAgent(
                 criteria=[

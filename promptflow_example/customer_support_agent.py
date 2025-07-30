@@ -1,10 +1,10 @@
 # References:
-# - https://langchain-ai.github.io/langgraph/concepts/functional_api/
-# - https://langchain-ai.github.io/langgraph/how-tos/react-agent-from-scratch-functional
-# - https://langchain-ai.github.io/langgraph/agents/agents/#memory
+# - https://microsoft.github.io/promptflow/
+# - https://microsoft.github.io/promptflow/concepts/concept-flow/
+# - https://github.com/Arize-ai/openinference/blob/main/python/instrumentation/openinference-instrumentation-promptflow/examples/chat_flow_example_to_phoenix.ipynb
 
 import os
-from typing import List, Literal
+from typing import List, Literal, Dict, Any
 import dotenv
 
 dotenv.load_dotenv()
@@ -18,13 +18,18 @@ from create_agent_app.common.customer_support.mocked_apis import (
     http_GET_order_status,
     http_GET_troubleshooting_guide,
 )
-from smolagents import tool, ToolCallingAgent, LiteLLMModel
 
-from openinference.instrumentation.smolagents import SmolagentsInstrumentor
+from promptflow.core import tool
+from promptflow.connections import AzureOpenAIConnection
+import openai
 
 import langwatch
 
-langwatch.setup(instrumentors=[SmolagentsInstrumentor()])
+# TODO: Add when available
+# from openinference.instrumentation.promptflow import PromptflowInstrumentor
+# langwatch.setup(instrumentors=[PromptflowInstrumentor()])
+
+langwatch.setup()
 
 SYSTEM_PROMPT = """
 <Introduction>
@@ -140,7 +145,7 @@ def get_troubleshooting_guide(
 
 
 @tool
-def escalate_to_human() -> dict[str, str]:
+def escalate_to_human() -> Dict[str, str]:
     """
     Escalate to human, retrieves a link for the customer to open a ticket with the support team
 
@@ -153,20 +158,169 @@ def escalate_to_human() -> dict[str, str]:
     }
 
 
-agent = ToolCallingAgent(
-    name="customer_support_agent",
-    model=LiteLLMModel(model_id="openai/gpt-4.1-mini"),
-    description="Customer support agent for XPTO Telecom",
-    tools=[
-        get_customer_order_history,
-        get_order_status,
-        get_company_policy,
-        get_troubleshooting_guide,
-        escalate_to_human,
-    ],
-    max_steps=10,
-    verbosity_level=1,
-)
+class CustomerSupportAgent:
+    def __init__(self):
+        # Set up OpenAI client
+        self.client = openai.OpenAI(
+            api_key=os.getenv("OPENAI_API_KEY"),
+            base_url=os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1"),
+        )
 
-# Set the system prompt
-agent.prompt_templates["system_prompt"] = SYSTEM_PROMPT
+        # Store conversation history
+        self.conversation_history = []
+
+    def chat(self, message: str, context: Dict[str, Any] = None) -> str:
+        """
+        Chat with the customer support agent
+
+        Args:
+            message: The user's message
+            context: Optional context for the conversation
+
+        Returns:
+            The agent's response
+        """
+        # Add user message to history
+        self.conversation_history.append({"role": "user", "content": message})
+
+        # Prepare messages for the API call
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+        ] + self.conversation_history
+
+        # Get available tools
+        tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_customer_order_history",
+                    "description": "Get the current customer order history",
+                    "parameters": {"type": "object", "properties": {}},
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_order_status",
+                    "description": "Get the status of a specific order",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "order_id": {
+                                "type": "string",
+                                "description": "The ID of the order",
+                            }
+                        },
+                        "required": ["order_id"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_company_policy",
+                    "description": "Get the company policy",
+                    "parameters": {"type": "object", "properties": {}},
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "get_troubleshooting_guide",
+                    "description": "Get the troubleshooting guide",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "guide": {
+                                "type": "string",
+                                "enum": [
+                                    "internet",
+                                    "mobile",
+                                    "television",
+                                    "ecommerce",
+                                ],
+                                "description": "The guide to get",
+                            }
+                        },
+                        "required": ["guide"],
+                    },
+                },
+            },
+            {
+                "type": "function",
+                "function": {
+                    "name": "escalate_to_human",
+                    "description": "Escalate to human support",
+                    "parameters": {"type": "object", "properties": {}},
+                },
+            },
+        ]
+
+        # Make the API call
+        response = self.client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            tools=tools,
+            tool_choice="auto",
+            temperature=0,
+        )
+
+        # Handle tool calls if any
+        if response.choices[0].message.tool_calls:
+            # Execute tool calls
+            for tool_call in response.choices[0].message.tool_calls:
+                function_name = tool_call.function.name
+                function_args = (
+                    eval(tool_call.function.arguments)
+                    if tool_call.function.arguments
+                    else {}
+                )
+
+                # Execute the appropriate function
+                if function_name == "get_customer_order_history":
+                    result = get_customer_order_history()
+                elif function_name == "get_order_status":
+                    result = get_order_status(**function_args)
+                elif function_name == "get_company_policy":
+                    result = get_company_policy()
+                elif function_name == "get_troubleshooting_guide":
+                    result = get_troubleshooting_guide(**function_args)
+                elif function_name == "escalate_to_human":
+                    result = escalate_to_human()
+                else:
+                    result = {"error": f"Unknown function: {function_name}"}
+
+                # Add tool response to conversation
+                self.conversation_history.append(
+                    {"role": "assistant", "content": None, "tool_calls": [tool_call]}
+                )
+                self.conversation_history.append(
+                    {
+                        "role": "tool",
+                        "content": str(result),
+                        "tool_call_id": tool_call.id,
+                    }
+                )
+
+            # Get final response after tool execution
+            messages = [
+                {"role": "system", "content": SYSTEM_PROMPT},
+            ] + self.conversation_history
+
+            response = self.client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=messages,
+                temperature=0,
+            )
+
+        # Add assistant response to history
+        assistant_message = response.choices[0].message.content
+        self.conversation_history.append(
+            {"role": "assistant", "content": assistant_message}
+        )
+
+        return assistant_message
+
+
+# Create a global instance
+agent = CustomerSupportAgent()

@@ -1,7 +1,6 @@
 # References:
-# - https://langchain-ai.github.io/langgraph/concepts/functional_api/
-# - https://langchain-ai.github.io/langgraph/how-tos/react-agent-from-scratch-functional
-# - https://langchain-ai.github.io/langgraph/agents/agents/#memory
+# - https://docs.llamaindex.ai/en/stable/examples/agent/agent_react_agent.html
+# - https://docs.llamaindex.ai/en/stable/examples/agent/agent_custom_tools.html
 
 import os
 from typing import List, Literal
@@ -18,13 +17,16 @@ from create_agent_app.common.customer_support.mocked_apis import (
     http_GET_order_status,
     http_GET_troubleshooting_guide,
 )
-from smolagents import tool, ToolCallingAgent, LiteLLMModel
 
-from openinference.instrumentation.smolagents import SmolagentsInstrumentor
+from llama_index.core.agent.workflow import ReActAgent
+from llama_index.llms.openai import OpenAI
+from llama_index.core.tools import FunctionTool
+from llama_index.core.memory import ChatMemoryBuffer
 
 import langwatch
+from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
 
-langwatch.setup(instrumentors=[SmolagentsInstrumentor()])
+langwatch.setup(instrumentors=[LlamaIndexInstrumentor()])
 
 SYSTEM_PROMPT = """
 <Introduction>
@@ -87,7 +89,6 @@ Today is 2025-04-19
 """
 
 
-@tool
 def get_customer_order_history() -> List[OrderSummaryResponse]:
     """
     Get the current customer order history
@@ -98,7 +99,6 @@ def get_customer_order_history() -> List[OrderSummaryResponse]:
     return http_GET_customer_order_history()
 
 
-@tool
 def get_order_status(order_id: str) -> OrderStatusResponse:
     """
     Get the status of a specific order
@@ -112,7 +112,6 @@ def get_order_status(order_id: str) -> OrderStatusResponse:
     return http_GET_order_status(order_id)
 
 
-@tool
 def get_company_policy() -> DocumentResponse:
     """
     Get the company policy
@@ -123,7 +122,6 @@ def get_company_policy() -> DocumentResponse:
     return http_GET_company_policy()
 
 
-@tool
 def get_troubleshooting_guide(
     guide: Literal["internet", "mobile", "television", "ecommerce"],
 ) -> DocumentResponse:
@@ -139,7 +137,6 @@ def get_troubleshooting_guide(
     return http_GET_troubleshooting_guide(guide)
 
 
-@tool
 def escalate_to_human() -> dict[str, str]:
     """
     Escalate to human, retrieves a link for the customer to open a ticket with the support team
@@ -153,20 +150,56 @@ def escalate_to_human() -> dict[str, str]:
     }
 
 
-agent = ToolCallingAgent(
-    name="customer_support_agent",
-    model=LiteLLMModel(model_id="openai/gpt-4.1-mini"),
-    description="Customer support agent for XPTO Telecom",
-    tools=[
-        get_customer_order_history,
-        get_order_status,
-        get_company_policy,
-        get_troubleshooting_guide,
-        escalate_to_human,
-    ],
-    max_steps=10,
-    verbosity_level=1,
+# Create tools
+get_customer_order_history_tool = FunctionTool.from_defaults(
+    fn=get_customer_order_history,
+    name="get_customer_order_history",
+    description="Get the current customer order history",
 )
 
-# Set the system prompt
-agent.prompt_templates["system_prompt"] = SYSTEM_PROMPT
+get_order_status_tool = FunctionTool.from_defaults(
+    fn=get_order_status,
+    name="get_order_status",
+    description="Get the status of a specific order",
+)
+
+get_company_policy_tool = FunctionTool.from_defaults(
+    fn=get_company_policy,
+    name="get_company_policy",
+    description="Get the company policy",
+)
+
+get_troubleshooting_guide_tool = FunctionTool.from_defaults(
+    fn=get_troubleshooting_guide,
+    name="get_troubleshooting_guide",
+    description="Get the troubleshooting guide for a specific topic",
+)
+
+escalate_to_human_tool = FunctionTool.from_defaults(
+    fn=escalate_to_human,
+    name="escalate_to_human",
+    description="Escalate to human support, retrieves a link for the customer to open a ticket",
+)
+
+# Create LLM
+llm = OpenAI(
+    model="gpt-4o-mini",
+    api_key=os.getenv("OPENAI_API_KEY"),
+    temperature=0,
+)
+
+# Create agent
+agent = ReActAgent(
+    name="customer_support_agent",
+    description="Customer support agent for XPTO Telecom",
+    system_prompt=SYSTEM_PROMPT,
+    tools=[
+        get_customer_order_history_tool,
+        get_order_status_tool,
+        get_company_policy_tool,
+        get_troubleshooting_guide_tool,
+        escalate_to_human_tool,
+    ],
+    llm=llm,
+    verbose=True,
+)
