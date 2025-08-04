@@ -21,12 +21,6 @@ from create_agent_app.common.customer_support.mocked_apis import (
 from llama_index.core.agent.workflow import ReActAgent
 from llama_index.llms.openai import OpenAI
 from llama_index.core.tools import FunctionTool
-from llama_index.core.memory import ChatMemoryBuffer
-
-import langwatch
-from openinference.instrumentation.llama_index import LlamaIndexInstrumentor
-
-langwatch.setup(instrumentors=[LlamaIndexInstrumentor()])
 
 SYSTEM_PROMPT = """
 <Introduction>
@@ -201,5 +195,5 @@ agent = ReActAgent(
         escalate_to_human_tool,
     ],
     llm=llm,
-    verbose=True,
+    verbose=False,
 )
