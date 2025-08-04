@@ -18,6 +18,7 @@ from create_agent_app.common.customer_support.mocked_apis import (
     http_GET_troubleshooting_guide,
 )
 
+from promptflow import Flow
 from promptflow.core import tool
 
 SYSTEM_PROMPT = """
@@ -147,16 +148,17 @@ def escalate_to_human() -> Dict[str, str]:
     }
 
 
-# Create a simple agent instance
-agent = {
-    "name": "customer_support_agent",
-    "description": "Customer support agent for XPTO Telecom",
-    "instruction": SYSTEM_PROMPT,
-    "tools": [
+# Create the PromptFlow agent flow
+agent = Flow(
+    name="customer_support_agent",
+    description="Customer support agent for XPTO Telecom",
+    system_prompt=SYSTEM_PROMPT,
+    tools=[
         get_customer_order_history,
         get_order_status,
         get_company_policy,
         get_troubleshooting_guide,
         escalate_to_human,
     ],
-}
+    model="openai/gpt-4o-mini",
+)
