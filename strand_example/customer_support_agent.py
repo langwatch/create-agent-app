@@ -17,6 +17,7 @@ from create_agent_app.common.customer_support.mocked_apis import (
     http_GET_order_status,
     http_GET_troubleshooting_guide,
 )
+from strand import Agent, tool
 
 SYSTEM_PROMPT = """
 <Introduction>
@@ -79,6 +80,7 @@ Today is 2025-04-19
 """
 
 
+@tool
 def get_customer_order_history() -> List[OrderSummaryResponse]:
     """
     Get the current customer order history
@@ -89,6 +91,7 @@ def get_customer_order_history() -> List[OrderSummaryResponse]:
     return http_GET_customer_order_history()
 
 
+@tool
 def get_order_status(order_id: str) -> OrderStatusResponse:
     """
     Get the status of a specific order
@@ -102,6 +105,7 @@ def get_order_status(order_id: str) -> OrderStatusResponse:
     return http_GET_order_status(order_id)
 
 
+@tool
 def get_company_policy() -> DocumentResponse:
     """
     Get the company policy
@@ -112,6 +116,7 @@ def get_company_policy() -> DocumentResponse:
     return http_GET_company_policy()
 
 
+@tool
 def get_troubleshooting_guide(
     guide: Literal["internet", "mobile", "television", "ecommerce"],
 ) -> DocumentResponse:
@@ -127,6 +132,7 @@ def get_troubleshooting_guide(
     return http_GET_troubleshooting_guide(guide)
 
 
+@tool
 def escalate_to_human() -> Dict[str, str]:
     """
     Escalate to human, retrieves a link for the customer to open a ticket with the support team
@@ -140,16 +146,15 @@ def escalate_to_human() -> Dict[str, str]:
     }
 
 
-# Create a simple agent instance
-agent = {
-    "name": "customer_support_agent",
-    "description": "Customer support agent for XPTO Telecom",
-    "instruction": SYSTEM_PROMPT,
-    "tools": [
+# Create the Strand AI agent
+agent = Agent(
+    model="openai/gpt-4o-mini",
+    system=SYSTEM_PROMPT,
+    tools=[
         get_customer_order_history,
         get_order_status,
         get_company_policy,
         get_troubleshooting_guide,
         escalate_to_human,
     ],
-}
+)
