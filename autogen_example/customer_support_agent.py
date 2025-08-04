@@ -18,6 +18,8 @@ from create_agent_app.common.customer_support.mocked_apis import (
     http_GET_troubleshooting_guide,
 )
 
+import autogen
+
 SYSTEM_PROMPT = """
 <Introduction>
 You are an AI customer service agent for XPTO Telecom, a telecommunications company providing internet, mobile, and television services, as well as selling mobile devices and related electronics. Your primary goal is to assist customers with their inquiries efficiently and effectively. You should always strive to provide helpful, accurate, and polite responses.
@@ -140,10 +142,69 @@ def escalate_to_human() -> Dict[str, str]:
     }
 
 
-# Create a simple agent instance
+# Configure AutoGen
+config_list = [
+    {
+        "model": "gpt-4o-mini",
+        "api_key": os.getenv("OPENAI_API_KEY"),
+    }
+]
+
+# Create the customer support agent
+customer_support_agent = autogen.AssistantAgent(
+    name="customer_support_agent",
+    system_message=SYSTEM_PROMPT,
+    llm_config={
+        "config_list": config_list,
+        "temperature": 0,
+    },
+    human_input_mode="NEVER",
+)
+
+# Create a user proxy agent to handle tool execution
+user_proxy = autogen.UserProxyAgent(
+    name="user_proxy",
+    human_input_mode="NEVER",
+    max_consecutive_auto_reply=10,
+    is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE"),
+    code_execution_config={"work_dir": "coding"},
+    llm_config={
+        "config_list": config_list,
+        "temperature": 0,
+    },
+)
+
+# Register tools with the user proxy
+user_proxy.register_function(
+    function_map={
+        "get_customer_order_history": get_customer_order_history,
+        "get_order_status": get_order_status,
+        "get_company_policy": get_company_policy,
+        "get_troubleshooting_guide": get_troubleshooting_guide,
+        "escalate_to_human": escalate_to_human,
+    }
+)
+
+# Create a group chat for the agents
+groupchat = autogen.GroupChat(
+    agents=[user_proxy, customer_support_agent],
+    messages=[],
+    max_round=50,
+)
+
+# Create the manager
+manager = autogen.GroupChatManager(
+    groupchat=groupchat,
+    llm_config={
+        "config_list": config_list,
+        "temperature": 0,
+    },
+)
+
+# Create a simple agent instance for compatibility
 agent = {
     "name": "customer_support_agent",
-    "description": "Customer support agent for XPTO Telecom",
+    "description": "Customer support agent for XPTO Telecom using AutoGen",
     "instruction": SYSTEM_PROMPT,
     "tools": [
         get_customer_order_history,
@@ -152,4 +213,9 @@ agent = {
         get_troubleshooting_guide,
         escalate_to_human,
     ],
+    "autogen_agents": {
+        "customer_support_agent": customer_support_agent,
+        "user_proxy": user_proxy,
+        "manager": manager,
+    },
 }
