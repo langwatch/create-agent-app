@@ -18,15 +18,6 @@ from create_agent_app.common.customer_support.mocked_apis import (
     http_GET_troubleshooting_guide,
 )
 
-import openai
-import langwatch
-
-# TODO: Add when available
-# from openinference.instrumentation.strand import StrandInstrumentor
-# langwatch.setup(instrumentors=[StrandInstrumentor()])
-
-langwatch.setup()
-
 SYSTEM_PROMPT = """
 <Introduction>
 You are an AI customer service agent for XPTO Telecom, a telecommunications company providing internet, mobile, and television services, as well as selling mobile devices and related electronics. Your primary goal is to assist customers with their inquiries efficiently and effectively. You should always strive to provide helpful, accurate, and polite responses.
@@ -149,168 +140,16 @@ def escalate_to_human() -> Dict[str, str]:
     }
 
 
-class CustomerSupportAgent:
-    def __init__(self):
-        # Set up OpenAI client
-        self.client = openai.OpenAI(
-            api_key=os.getenv("OPENAI_API_KEY"),
-            base_url=os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1"),
-        )
-
-        # Store conversation history
-        self.conversation_history = []
-
-    def run(self, message: str) -> str:
-        """
-        Run the customer support agent with a message
-
-        Args:
-            message: The user's message
-
-        Returns:
-            The agent's response
-        """
-        # Add user message to history
-        self.conversation_history.append({"role": "user", "content": message})
-
-        # Prepare messages for the API call
-        messages = [
-            {"role": "system", "content": SYSTEM_PROMPT},
-        ] + self.conversation_history
-
-        # Get available tools
-        tools = [
-            {
-                "type": "function",
-                "function": {
-                    "name": "get_customer_order_history",
-                    "description": "Get the current customer order history",
-                    "parameters": {"type": "object", "properties": {}},
-                },
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "get_order_status",
-                    "description": "Get the status of a specific order",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "order_id": {
-                                "type": "string",
-                                "description": "The ID of the order",
-                            }
-                        },
-                        "required": ["order_id"],
-                    },
-                },
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "get_company_policy",
-                    "description": "Get the company policy",
-                    "parameters": {"type": "object", "properties": {}},
-                },
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "get_troubleshooting_guide",
-                    "description": "Get the troubleshooting guide",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "guide": {
-                                "type": "string",
-                                "enum": [
-                                    "internet",
-                                    "mobile",
-                                    "television",
-                                    "ecommerce",
-                                ],
-                                "description": "The guide to get",
-                            }
-                        },
-                        "required": ["guide"],
-                    },
-                },
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "escalate_to_human",
-                    "description": "Escalate to human support",
-                    "parameters": {"type": "object", "properties": {}},
-                },
-            },
-        ]
-
-        # Make the API call
-        response = self.client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=messages,
-            tools=tools,
-            tool_choice="auto",
-            temperature=0,
-        )
-
-        # Handle tool calls if any
-        if response.choices[0].message.tool_calls:
-            # Execute tool calls
-            for tool_call in response.choices[0].message.tool_calls:
-                function_name = tool_call.function.name
-                function_args = (
-                    eval(tool_call.function.arguments)
-                    if tool_call.function.arguments
-                    else {}
-                )
-
-                # Execute the appropriate function
-                if function_name == "get_customer_order_history":
-                    result = get_customer_order_history()
-                elif function_name == "get_order_status":
-                    result = get_order_status(**function_args)
-                elif function_name == "get_company_policy":
-                    result = get_company_policy()
-                elif function_name == "get_troubleshooting_guide":
-                    result = get_troubleshooting_guide(**function_args)
-                elif function_name == "escalate_to_human":
-                    result = escalate_to_human()
-                else:
-                    result = {"error": f"Unknown function: {function_name}"}
-
-                # Add tool response to conversation
-                self.conversation_history.append(
-                    {"role": "assistant", "content": None, "tool_calls": [tool_call]}
-                )
-                self.conversation_history.append(
-                    {
-                        "role": "tool",
-                        "content": str(result),
-                        "tool_call_id": tool_call.id,
-                    }
-                )
-
-            # Get final response after tool execution
-            messages = [
-                {"role": "system", "content": SYSTEM_PROMPT},
-            ] + self.conversation_history
-
-            response = self.client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=messages,
-                temperature=0,
-            )
-
-        # Add assistant response to history
-        assistant_message = response.choices[0].message.content
-        self.conversation_history.append(
-            {"role": "assistant", "content": assistant_message}
-        )
-
-        return assistant_message
-
-
-# Create a global instance
-agent = CustomerSupportAgent()
+# Create a simple agent instance
+agent = {
+    "name": "customer_support_agent",
+    "description": "Customer support agent for XPTO Telecom",
+    "instruction": SYSTEM_PROMPT,
+    "tools": [
+        get_customer_order_history,
+        get_order_status,
+        get_company_policy,
+        get_troubleshooting_guide,
+        escalate_to_human,
+    ],
+}
