@@ -170,11 +170,7 @@ def escalate_to_human() -> Dict[str, str]:
 
 # Create OpenAI model
 model = OpenAIModel(
-    client_args={
-        "api_key": os.getenv(
-            "OPENAI_API_KEY", "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"
-        )
-    },
+    client_args={"api_key": os.getenv("OPENAI_API_KEY", "your-openai-api-key")},
     model_id="gpt-4o",
     params={"max_tokens": 1000, "temperature": 0.7},
 )
