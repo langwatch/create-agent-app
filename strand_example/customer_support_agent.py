@@ -1,6 +1,7 @@
 # References:
 # - https://github.com/strand-ai/strand
 # - https://docs.strand.ai/
+# - https://docs.langwatch.ai/integration/python/integrations/strand-agents
 
 import os
 from typing import List, Literal, Dict, Any
@@ -17,7 +18,28 @@ from create_agent_app.common.customer_support.mocked_apis import (
     http_GET_order_status,
     http_GET_troubleshooting_guide,
 )
-from strand import Agent, tool
+from strands import Agent, tool
+from strands.telemetry import StrandsTelemetry
+from strands.models.openai import OpenAIModel
+import langwatch
+
+# Load environment variables from .env file in the root directory
+dotenv.load_dotenv()
+
+# Set up environment variables (with fallbacks for demo)
+if not os.getenv("LANGWATCH_API_KEY"):
+    os.environ["LANGWATCH_API_KEY"] = "your-langwatch-api-key"
+if not os.getenv("OPENAI_API_KEY"):
+    os.environ["OPENAI_API_KEY"] = "your-openai-api-key"
+
+# Initialize LangWatch
+langwatch.setup()
+
+# Configure the telemetry with LangWatch endpoint
+strands_telemetry = StrandsTelemetry().setup_otlp_exporter(
+    endpoint="https://api.langwatch.ai/v1/otel",
+    headers={"Authorization": f"Bearer {os.environ['LANGWATCH_API_KEY']}"},
+)
 
 SYSTEM_PROMPT = """
 <Introduction>
@@ -146,10 +168,21 @@ def escalate_to_human() -> Dict[str, str]:
     }
 
 
-# Create the Strand AI agent
+# Create OpenAI model
+model = OpenAIModel(
+    client_args={
+        "api_key": os.getenv(
+            "OPENAI_API_KEY", "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"
+        )
+    },
+    model_id="gpt-4o",
+    params={"max_tokens": 1000, "temperature": 0.7},
+)
+
+# Create the Strand AI agent with LangWatch tracing attributes
 agent = Agent(
-    model="openai/gpt-4o-mini",
-    system=SYSTEM_PROMPT,
+    model=model,
+    system_prompt=SYSTEM_PROMPT,
     tools=[
         get_customer_order_history,
         get_order_status,
@@ -157,4 +190,55 @@ agent = Agent(
         get_troubleshooting_guide,
         escalate_to_human,
     ],
+    trace_attributes={
+        "agent_name": "customer_support_agent",
+        "model": "gpt-4o",
+        "service": "xpto_telecom",
+        "environment": "production",
+    },
 )
+
+
+@langwatch.trace(name="Customer Support Agent Interaction")
+def run_agent_interaction(
+    user_message: str, user_id: str | None = None, session_id: str | None = None
+):
+    """
+    Run the customer support agent with LangWatch tracing
+
+    Args:
+        user_message: The user's message
+        user_id: Optional user ID for tracing
+        session_id: Optional session ID for tracing
+
+    Returns:
+        The agent's response
+    """
+    # Update the current trace with additional metadata
+    current_trace = langwatch.get_current_trace()
+    if current_trace:
+        metadata = {
+            "agent_name": "customer_support_agent",
+            "model": "gpt-4o",
+            "service": "xpto_telecom",
+        }
+
+        if user_id:
+            metadata["user_id"] = user_id
+        if session_id:
+            metadata["session_id"] = session_id
+
+        current_trace.update(metadata=metadata)
+
+    response = agent(user_message)
+    return response
+
+
+# Example usage
+if __name__ == "__main__":
+    user_prompt = "Hi, I need help with my internet connection. It's been slow for the past few days."
+    response = run_agent_interaction(
+        user_prompt, user_id="customer_123", session_id="session_456"
+    )
+    print(f"User: {user_prompt}")
+    print(f"Agent: {response}")
